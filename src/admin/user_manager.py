@@ -113,7 +113,6 @@ def view_user():
             status = "غیر فعال"
         print(f"{user.name}/{user.username}/{user.role}/{status}")
     print(f"تعداد کاربران : {len(users)}")
-#امتیازی
 def save_user_report():
     users = load_user()
     if not users:
