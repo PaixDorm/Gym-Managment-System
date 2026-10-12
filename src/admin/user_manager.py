@@ -22,8 +22,8 @@ def save_user(users):
     os.makedirs("data",exist_ok=True)
     with open(USERS_FILE,"w") as f:
         for user in users:
-            line = f"{user.name} | {user.username} | {user.password} | {user.email} | {user.role} | {user.is_active}"
-            f.write(line + "/n")
+            line = f"{user.name}|{user.username}|{user.password}|{user.email}|{user.role}|{user.is_active}"
+            f.write(line + "\n")
 def find_username(username):
     users = load_user()
     for user in users:
@@ -37,7 +37,7 @@ def add_user(name,username,password,email,role):
     if not validate_username(username):
         print("نام کاربری نامعتبر")
         return False
-    if validate_password(password):
+    if not validate_password(password):
         print("پسورد نامعتبر")
         return False
     if not validate_email(email):
@@ -82,7 +82,7 @@ def edit_user(username,new_name=None,new_password=None,new_email=None,new_is_act
         target.email = new_email
     if new_is_active is not None:
         target.is_active = new_is_active
-    save_user(user)
+    save_user(users)
     print("نام کاربری ویرایش شد")
     return True
 def toggle_active(username):
