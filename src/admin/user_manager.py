@@ -11,10 +11,16 @@ def load_user():
             line = line.strip()
             if not line:
                 continue
-            parts = line.split("|")
+            parts = line.split("\t")
             if len(parts) != 6:
-                continue
-            name , username,password,email,role,is_active = parts
+                raise ValueError("سطر خراب در فایل")
+            name , username,password,email,role,is_active_str = parts
+            if is_active_str == "True":
+                is_active = True
+            elif is_active_str == "False":
+                is_active = False
+            else:
+                raise ValueError("مقدار نامعتبر")
             user = User(name=name,username=username,password=password,email=email,role=role,is_active=is_active)
             users.append(user)
     return users
@@ -22,7 +28,7 @@ def save_user(users):
     os.makedirs("data",exist_ok=True)
     with open(USERS_FILE,"w") as f:
         for user in users:
-            line = f"{user.name}|{user.username}|{user.password}|{user.email}|{user.role}|{str(user.is_active)}"
+            line = f"{user.name}\t{user.username}\t{user.password}\t{user.email}\t{user.role}\t{str(user.is_active)}"
             f.write(line + "\n")
 def find_username(username):
     users = load_user()
@@ -93,7 +99,7 @@ def toggle_active(username):
             target = user
             break
     if target is None:
-        print("نام کاربری چیدا نشد")
+        print("نام کاربری پیدا نشد")
         return False
     target.is_active = not target.is_active
     save_user(users)
