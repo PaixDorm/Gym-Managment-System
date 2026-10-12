@@ -4,7 +4,7 @@ class User:
         self.username = username
         self.password = password
         self.email = email
-        self.role = role
+        self.role = role if role else "member"
         self.is_active = is_active
     def to_dict(self):
         return {"name" : self.name , 
@@ -16,7 +16,7 @@ class User:
     @classmethod
     def from_dict(cls,data):
         return cls(name=data.get("name",""),username=data.get("username",""),password=data.get("password",""),
-                   email=data.get("email",""),role=data.get("role",""),is_active=data.get("is_active",True))
+                   email=data.get("email",""),role=data.get("role","member"),is_active=data.get("is_active",True))
     
     
     
