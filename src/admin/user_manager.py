@@ -26,12 +26,14 @@ def load_user():
     return users
 def save_user(users):
     os.makedirs("data",exist_ok=True)
-    with open(USERS_FILE,"w",encoding="utf-8") as f:
-        def clean(v):
-            return str(v).replace("\t"," ").replace("\n"," ")
+    def clean(v):
+        return str(v).replace("\t"," ").replace("\n"," ")
+    tmp_file = USERS_FILE + ".tmp"
+    with open(tmp_file,"w",encoding="utf-8") as f:
         for user in users:
-            line = f"{user.name}\t{user.username}\t{user.password}\t{user.email}\t{user.role}\t{str(user.is_active)}"
+            line = f"{clean(user.name)}\t{clean(user.username)}\t{clean(user.password)}\t{clean(user.email)}\t{clean(user.role)}\t{str(user.is_active)}"
             f.write(line + "\n")
+    os.replace(tmp_file,USERS_FILE)
 def find_username(username):
     users = load_user()
     for user in users:
@@ -58,13 +60,21 @@ def add_user(name,username,password,email,role):
         print("نام کاربری تکراری")
         return False
     new_user = User(name=name,username=username,password=password,email=email,role=role,is_active=True)
-    users = load_user()
+    try:
+        users = load_user()
+    except ValueError as e:
+        print(f"خطا در فایل کاربران:{e}")
+        return False
     users.append(new_user)
     save_user(users)
     print("کاربر با موفقیت اضافه شد")
     return True
 def edit_user(username,new_name=None,new_password=None,new_email=None,new_is_active=None):
-    users = load_user()
+    try:
+        users = load_user()
+    except ValueError as e:
+        print(f"خطا در فایل کاربران:{e}")
+        return False
     target = None
     for user in users:
         if user.username == username:
@@ -97,7 +107,11 @@ def edit_user(username,new_name=None,new_password=None,new_email=None,new_is_act
     print("نام کاربری ویرایش شد")
     return True
 def toggle_active(username):
-    users = load_user()
+    try:
+        users = load_user()
+    except ValueError as e:
+        print(f"خطا در فایل کاربران:{e}")
+        return False
     target = None
     for user in users:
         if user.username == username:
@@ -114,7 +128,11 @@ def toggle_active(username):
         print("وضعیت به غیر فعال تغییر کرد")
     return True
 def view_user():
-    users = load_user()
+    try:
+        users = load_user()
+    except ValueError as e:
+        print(f"خطا در فایل کاربران:{e}")
+        return 
     if not users:
         print("کاربری ثبت نشده")
         return
