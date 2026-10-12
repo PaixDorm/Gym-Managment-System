@@ -22,7 +22,7 @@ def save_user(users):
     os.makedirs("data",exist_ok=True)
     with open(USERS_FILE,"w") as f:
         for user in users:
-            line = f"{user.name}|{user.username}|{user.password}|{user.email}|{user.role}|{user.is_active}"
+            line = f"{user.name}|{user.username}|{user.password}|{user.email}|{user.role}|{str(user.is_active)}"
             f.write(line + "\n")
 def find_username(username):
     users = load_user()
@@ -101,6 +101,7 @@ def toggle_active(username):
         print("وضعیت به فعال تغییر کرد")
     else:
         print("وضعیت به غیر فعال تغییر کرد")
+    return True
 def view_user():
     users = load_user()
     if not users:
@@ -111,7 +112,7 @@ def view_user():
             status = "فعال"
         else:
             status = "غیر فعال"
-        print(f"{user.name}/{user.username}/{user.role}/{status}")
+        print(f"{user.name}|{user.username}|{user.role}|{user.email}|{status}")
     print(f"تعداد کاربران : {len(users)}")
 def save_user_report():
     users = load_user()
