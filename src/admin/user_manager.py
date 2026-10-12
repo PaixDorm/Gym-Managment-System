@@ -6,7 +6,7 @@ def load_user():
     if not os.path.exists(USERS_FILE):
        return []
     users = []
-    with open(USERS_FILE,"r") as f:
+    with open(USERS_FILE,"r",encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -134,7 +134,7 @@ def save_user_report():
             members.append(user)
     os.makedirs("data",exist_ok=True)
     report_file = "data/user.txt"
-    with open(report_file,"w") as f:
+    with open(report_file,"w",encoding="utf-8") as f:
         f.write("گزارش کاربران:\n")
         f.write("مربیان:\n")
         for user in coaches:
