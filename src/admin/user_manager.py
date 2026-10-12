@@ -144,7 +144,11 @@ def view_user():
         print(f"{user.name}|{user.username}|{user.role}|{user.email}|{status}")
     print(f"تعداد کاربران : {len(users)}")
 def save_user_report():
-    users = load_user()
+    try:
+        users = load_user()
+    except ValueError as e:
+        print(f"خطا در فایل کاربران:{e}")
+        return False
     if not users:
         print("کاربری وجود ندارد")
         return False
