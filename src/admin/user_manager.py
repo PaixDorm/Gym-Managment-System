@@ -26,7 +26,9 @@ def load_user():
     return users
 def save_user(users):
     os.makedirs("data",exist_ok=True)
-    with open(USERS_FILE,"w") as f:
+    with open(USERS_FILE,"w",encoding="utf-8") as f:
+        def clean(v):
+            return str(v).replace("\t"," ").replace("\n"," ")
         for user in users:
             line = f"{user.name}\t{user.username}\t{user.password}\t{user.email}\t{user.role}\t{str(user.is_active)}"
             f.write(line + "\n")
@@ -87,6 +89,9 @@ def edit_user(username,new_name=None,new_password=None,new_email=None,new_is_act
             return False
         target.email = new_email
     if new_is_active is not None:
+        if not isinstance(new_is_active, bool):
+            print("مقدار وضعیت نامعتبر")
+            return False
         target.is_active = new_is_active
     save_user(users)
     print("نام کاربری ویرایش شد")
