@@ -1,21 +1,17 @@
 import os
-from datetime import date
-from src.models.subscription import Subscription, SubscriptionPlan, next_start_date
-from src.models.transaction import Transaction
+from datetime import date, datetime
+from src.models.subscription import Subscription, SubscriptionPlan, next_start_date, month_to_persian
 from src.models.wallet import InsufficientBalanceError
-from src.member.wallet_manager import get_wallet, record_transaction, StorageError, get_transactions
+from src.member.wallet_manager import (get_wallet, record_transaction, new_transaction, get_all_transactions, StorageError)
 
-# constants and paths
 current_dir = os.path.abspath(os.path.dirname(__file__))
 subscription_file_path = os.path.normpath(os.path.join(current_dir, "../../data/subscriptions.txt"))
 
-# subscription plans
 subscription_plans = {
     1: SubscriptionPlan(months=1, price=100000),
     3: SubscriptionPlan(months=3, price=250000),
     6: SubscriptionPlan(months=6, price=450000)}
 
-# Functions for saving and reading the subscriptions file
 def _append_subscription(sub):
     """افزودن یک خط اشتراک به انتهای فایل با رمزگذاری utf-8"""
     if not isinstance(sub, Subscription):
@@ -30,7 +26,6 @@ def _append_subscription(sub):
     except OSError:
         raise StorageError("خطا در ذخیره‌سازی اطلاعات اشتراک روی دیسک.") from None
 
-# Read all lines from the subscriptions file; returns an empty list if the file does not exist
 def _read_subscription_lines():
     """خواندن تمام خطوط فایل اشتراک‌ها؛ در صورت عدم وجود فایل، لیست خالی برمی‌گرداند"""
     if not os.path.exists(subscription_file_path):
@@ -41,7 +36,6 @@ def _read_subscription_lines():
     except OSError:
         raise StorageError("خطا در خواندن فایل اشتراک‌ها از روی دیسک.") from None
 
-# Load all saved subscriptions with strict control capability
 def _load_subscriptions(strict=False):
     """بارگذاری تمام اشتراک‌های ذخیره‌شده با قابلیت کنترل strict"""
     lines = _read_subscription_lines()
@@ -59,12 +53,32 @@ def _load_subscriptions(strict=False):
             continue            
     return subscriptions
 
-# loading Subscription Plans Catalog Dictionary
+def _load_paid_subscriptions():
+    """
+    فقط اشتراک‌های «پرداخت‌شده»: ردیفی که تراکنش subscription با همان شماره پیگیری دارد.
+    تراکنش، نهایی‌کننده‌ی خرید است؛ ردیف معلق (بدون تراکنش) نادیده گرفته می‌شود.
+    خواندن سخت‌گیرانه است: ردیف خراب خطا با شماره‌ی خط می‌دهد و بی‌صدا حذف نمی‌شود.
+    """
+    paid_codes = {tx.tracking_code for tx in get_all_transactions(strict=True)
+                  if tx.transaction_type == "subscription"}
+    return [sub for sub in _load_subscriptions(strict=True) if sub.tracking_code in paid_codes]
+  
+def _resolve_today(today):
+    if today is None:
+        return date.today()
+    if type(today) is not date:
+        raise ValueError("تاریخ امروز باید از نوع date باشد.")
+    return today
+ 
+def _clean_username(username):
+    if not isinstance(username, str) or not username.strip():
+        raise ValueError("نام کاربری نامعتبر است.")
+    return username.strip()
+
 def get_plans():
     """دریافت دیکشنری کاتالوگ طرح‌های اشتراک"""
     return subscription_plans
 
-# Retrieve subscription plan based on the number of months, with strict data type validation.
 def get_plan(months):
     """دریافت طرح اشتراک بر اساس تعداد ماه با ولیدیشن دقیق نوع داده"""
     if isinstance(months, bool) or not isinstance(months, int):
@@ -73,16 +87,17 @@ def get_plan(months):
         raise ValueError(f"طرح اشتراکی برای مدت {months} ماه وجود ندارد.")
     return subscription_plans[months]
 
-# getting the list of one user's subscriptions
-def get_user_subscriptions(username):
-    """دریافت لیست اشتراک‌های متعلق به یک کاربر خاص"""
-    if not isinstance(username, str) or not username.strip():
-        raise ValueError("نام کاربری نامعتبر است.")
-    username = username.strip()
-    all_subs = _load_subscriptions(strict=False)
-    return [sub for sub in all_subs if sub.username == username]
+def set_plan(months, price):
+    """ثبت یا ویرایش طرح اشتراک توسط مدیر (نوع و مبلغ)"""
+    plan = SubscriptionPlan(months, price)   # اعتبارسنجی مدل: ValueError برای ماه یا قیمت نامعتبر
+    subscription_plans[months] = plan
+    return plan
 
-# getting the last subscription of user based on the end-date
+def get_user_subscriptions(username):
+    """دریافت اشتراک‌های پرداخت‌شده‌ی یک کاربر"""
+    username = _clean_username(username)
+    return [sub for sub in _load_paid_subscriptions() if sub.username == username]
+
 def get_latest_subscription(username):
     """دریافت آخرین اشتراک کاربر بر اساس تاریخ پایان (بزرگ‌ترین end_date)"""
     user_subs = get_user_subscriptions(username)
@@ -90,11 +105,9 @@ def get_latest_subscription(username):
         return None
     return max(user_subs, key=lambda s: s.end_date)
 
-# status and left-days functions
-def get_subscription_status(username, today=None):
-    """بررسی وضعیت اشتراک‌های کاربر (active، expired یا none)"""
-    if today is not None and type(today) is not date:
-        raise ValueError("تاریخ امروز باید از نوع date باشد.")
+def get_subscription_state(username, today=None):
+    """وضعیت اشتراک کاربر: 'active' یا 'expired' یا 'none'"""
+    today = _resolve_today(today)
     user_subs = get_user_subscriptions(username)
     if not user_subs:
         return "none"
@@ -102,85 +115,95 @@ def get_subscription_status(username, today=None):
         return "active"
     return "expired"
 
-# calculating left days of active subscription
-def get_days_left(username, today=None):
-    """محاسبه تعداد روزهای باقی‌مانده از فعال‌ترین اشتراک"""
-    if today is not None and type(today) is not date:
-        raise ValueError("تاریخ امروز باید از نوع date باشد.")
-    if get_subscription_status(username, today) != "active":
-        return 0
+def has_active_subscription(username, today=None):
+    """آیا کاربر در این روز اشتراک فعال دارد؟ (برای ثبت‌نام کلاس)"""
+    return get_subscription_state(username, today) == "active"
+ 
+def get_current_subscription(username, today=None):
+    """برای پروفایل: اشتراک فعال امروز، وگرنه آخرین اشتراک؛ بدون اشتراک: None"""
+    today = _resolve_today(today)
     user_subs = get_user_subscriptions(username)
-    active_subs = [sub for sub in user_subs if sub.is_active(today)]
-
-    if not active_subs:
+    if not user_subs:
+        return None
+    active = [sub for sub in user_subs if sub.is_active(today)]
+    if active:
+        return max(active, key=lambda s: s.end_date)
+    return max(user_subs, key=lambda s: s.end_date)
+ 
+def get_days_left(username, today=None):
+    """روزهای باقی‌مانده‌ی اشتراک فعال (برای اشتراک غیرفعال: ۰)"""
+    today = _resolve_today(today)
+    active = [sub for sub in get_user_subscriptions(username) if sub.is_active(today)]
+    if not active:
         return 0
-    latest_active = max(active_subs, key=lambda s: s.end_date)
-    return latest_active.days_left(today)
+    return max(active, key=lambda s: s.end_date).days_left(today)
 
-# buy_subscription
 def buy_subscription(username, months, today=None):
-    """خرید یا تمدید اشتراک با کسر از کیف پول و ثبت تراکنش و اشتراک"""
-    # username, date, and subscription plan validation
-    if not isinstance(username, str) or not username.strip():
-        raise ValueError("نام کاربری نامعتبر است.")
-    username = username.strip()
-    if today is not None and type(today) is not date:
-        raise ValueError("تاریخ امروز باید از نوع date باشد.")
+    """
+    خرید یا تمدید اشتراک. ترتیب نوشتن: اول ردیف اشتراک (معلق)، بعد تراکنش پرداخت (نهایی‌کننده).
+    اگر هر کدام خطا بدهد، پولی کم نشده و ردیف معلق نادیده گرفته می‌شود؛ تلاش مجدد فقط یک بار پول کم می‌کند.
+    """
+    username = _clean_username(username)
+    today = None if today is None else _resolve_today(today)
     plan = get_plan(months)
-    # checking user's balance
+
     wallet = get_wallet(username)
     if not wallet.has_enough(plan.price):
         raise InsufficientBalanceError(f"موجودی کیف پول برای خرید این اشتراک کافی نیست. موجودی: {wallet.balance}, مبلغ: {plan.price}")
-    # calculating the new start date (chain renewl)
+ 
+    now = datetime.now().replace(microsecond=0)
+    when = datetime.combine(today, now.time()) if today is not None else now
+    payment_day = when.date()
     latest_sub = get_latest_subscription(username)
-    start_date = next_start_date(latest_sub, today)
-    # creating the transaction object
-    description = f"خرید اشتراک {plan.title}"
-    if "|" in description or "\n" in description or "\r" in description:
-        raise ValueError("توضیحات تراکنش شامل کاراکترهای غیرمجاز است.")
-    # Deducting from the wallet balance (by reducing the `wallet` object's balance or applying a transaction via the manager)
-    # Note: The balance in `wallet_manager` is calculated based on transactions; therefore, recording a 'subscription' type transaction reduces the balance. 
-    # To apply the deduction, the `wallet` object must perform the withdrawal:
-    wallet.withdraw(plan.price)
-    tx = Transaction(
-        username=username, transaction_type="subscription", amount=plan.price, description=description, date=datetime_now_if_needed(today) # اگر نیاز به تاریخ پرداخت باشد در تراکنش ثبت می‌شود
-    ) if False else Transaction(username=username, transaction_type="subscription", amount=plan.price, description=description)
-    # creating the subscription object with the tracking code of transaction
-    if today is None:
-        today_val = date.today()
-    else:
-        today_val = today
-    sub = Subscription(username=username, months=months, amount=plan.price, start_date=start_date, tracking_code=tx.tracking_code, payment_date=today_val)
-    # recording transactions and subscriptions in files
-    try:
-        record_transaction(tx)
-    except Exception:
-        # If the transaction recording fails, we refund the deducted balance (or return a storage error).
-        raise StorageError("خطا در ثبت تراکنش خرید اشتراک روی دیسک.") from None
+    start_date = next_start_date(latest_sub, payment_day)
+ 
+    tx = new_transaction(username, "subscription", plan.price, f"خرید اشتراک {plan.title}", when)
+    sub = Subscription(username=username, months=months, amount=plan.price, start_date=start_date, tracking_code=tx.tracking_code, payment_date=payment_day)
     try:
         _append_subscription(sub)
+        record_transaction(tx)
     except StorageError:
-        raise StorageError(f"پرداخت انجام شد ولی اشتراک ثبت نشد، شماره پیگیری: {tx.tracking_code}") from None
+        raise StorageError("خرید انجام نشد؛ مبلغی کسر نشد. دوباره تلاش کنید.") from None
     return sub
 
-# helper for setting date for transactions if needed
-def datetime_now_if_needed(today):
-    pass
-
-# manager's reports
-def get_all_transactions():
-    """دریافت تمام تراکنش‌های ثبت‌شده در سیستم (جهت استفاده در گزارش‌های مالی)"""
-    from src.member.wallet_manager import _load_transactions
-    return _load_transactions(strict=False)
-
-# getting all transactions related to purchasing subscriptions
+def get_all_subscriptions():
+    """همه‌ی اشتراک‌های پرداخت‌شده (برای گزارش‌ها)"""
+    return _load_paid_subscriptions()
+  
 def get_all_subscription_payments():
-    """دریافت تمام تراکنش‌های مربوط به خرید اشتراک"""
-    all_txs = get_all_transactions()
-    return [tx for tx in all_txs if tx.transaction_type == "subscription"]
-
-# whole income of selling subscriptons
+    """همه‌ی تراکنش‌های مربوط به خرید اشتراک"""
+    return [tx for tx in get_all_transactions(strict=True) if tx.transaction_type == "subscription"]
+ 
+def get_payments_report():
+    """گزارش پرداخت‌های اشتراک؛ جدیدترین پرداخت اول. نام واقعی عضو را پنل مدیر از ماژول کاربران اضافه می‌کند."""
+    subs = sorted(_load_paid_subscriptions(), key=lambda s: (s.payment_date, s.tracking_code), reverse=True)
+    return [ {"username": s.username, "plan": month_to_persian.get(s.months, ""), "months": s.months, "amount": s.amount, "payment_date": s.payment_date, "start_date": s.start_date, "end_date": s.end_date, "tracking_code": s.tracking_code,} for s in subs]
+  
+def get_members_status(usernames, today=None):
+    """وضعیت اشتراک هر عضو؛ فهرست نام‌ها را پنل مدیر می‌دهد (عضو بدون خرید: 'none')"""
+    today = _resolve_today(today)
+    if not isinstance(usernames, (list, tuple, set)):
+        raise ValueError("فهرست نام‌های کاربری باید لیست باشد.")
+    cleaned = [_clean_username(u) for u in usernames]
+    paid = _load_paid_subscriptions()
+    result = {}
+    for username in cleaned:
+        user_subs = [s for s in paid if s.username == username]
+        if not user_subs:
+            result[username] = "none"
+        elif any(s.is_active(today) for s in user_subs):
+            result[username] = "active"
+        else:
+            result[username] = "expired"
+    return result
+ 
 def get_total_revenue():
-    """محاسبه کل درآمد حاصل از فروش اشتراک‌ها"""
-    sub_payments = get_all_subscription_payments()
-    return sum(tx.amount for tx in sub_payments)
+    """کل درآمد حاصل از فروش اشتراک‌ها (جمع اشتراک‌های پرداخت‌شده)"""
+    return sum(sub.amount for sub in _load_paid_subscriptions())
+ 
+def get_revenue_by_type():
+    """درآمد به تفکیک نوع اشتراک: {تعداد ماه: جمع مبلغ}"""
+    revenue = {}
+    for sub in _load_paid_subscriptions():
+        revenue[sub.months] = revenue.get(sub.months, 0) + sub.amount
+    return revenue

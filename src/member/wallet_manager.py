@@ -1,18 +1,17 @@
 import os
 import re
 from src.models.wallet import Wallet
-from src.models.transaction import Transaction
+from src.models.transaction import Transaction, generate_tracking_code
 from Bank import API
 
-# regex patterns for Bank and amount inputs validation
-card_regex = re.compile(r"^\d{16}$")
+card_regex = re.compile(r"^[0-9]{16}$")
 month_regex = re.compile(r"^(?:0?[1-9]|1[0-2])$")
-year_regex = re.compile(r"^\d{4}$")
-password_regex = re.compile(r"^\d{6}$")
-cvv2_regex = re.compile(r"^\d{3}$")
-amount_regex = re.compile(r"^[1-9]\d*$")
+year_regex = re.compile(r"^[0-9]{4}$")
+password_regex = re.compile(r"^[0-9]{6}$")
+cvv2_regex = re.compile(r"^[0-9]{3}$")
+amount_regex = re.compile(r"^[1-9][0-9]*$")
 
-# card validation
+
 def validate_card_number(card_input):
     """بررسی و اعتبارسنجی شماره کارت (دقیقاً ۱۶ رقم)"""
     if not isinstance(card_input, str):
@@ -22,7 +21,6 @@ def validate_card_number(card_input):
         raise ValueError("شماره کارت باید دقیقاً ۱۶ رقم باشد.")
     return card_str
 
-# expiration month validation (between 1 to 12)
 def validate_exp_month(month_input):
     """بررسی و اعتبارسنجی ماه انقضا (بین ۱ تا ۱۲)"""
     if not isinstance(month_input, str):
@@ -32,7 +30,6 @@ def validate_exp_month(month_input):
         raise ValueError("ماه انقضا باید عددی بین ۱ تا ۱۲ باشد.")
     return int(month_str)
 
-# expiration year validation (4 digits)
 def validate_exp_year(year_input):
     """بررسی و اعتبارسنجی سال انقضا (چهار رقمی)"""
     if not isinstance(year_input, str):
@@ -42,7 +39,6 @@ def validate_exp_year(year_input):
         raise ValueError("سال انقضا باید یک عدد چهار رقمی معتبر باشد.")
     return int(year_str)
 
-# password validation (6 digits preciselt with 0s included)
 def validate_card_password(password_input):
     """بررسی و اعتبارسنجی رمز دوم (دقیقاً ۶ رقم با حفظ صفرهای اولیه)"""
     if not isinstance(password_input, str):
@@ -52,7 +48,6 @@ def validate_card_password(password_input):
         raise ValueError("رمز دوم باید دقیقاً ۶ رقم باشد.")
     return pass_str
 
-# cvv2 valiidation (precisely 3 digits)
 def validate_cvv2(cvv2_input):
     """بررسی و اعتبارسنجی CVV2 (دقیقاً ۳ رقم)"""
     if not isinstance(cvv2_input, str):
@@ -62,7 +57,6 @@ def validate_cvv2(cvv2_input):
         raise ValueError("کد CVV2 باید دقیقاً ۳ رقم باشد.")
     return cvv2_str
 
-# amount validation
 def validate_amount(amount_input):
     """بررسی و اعتبارسنجی مبلغ تراکنش"""
     if not isinstance(amount_input, str):
@@ -82,7 +76,6 @@ def validate_payment_inputs(card, month, year, password, cvv2, amount):
     valid_amount = validate_amount(amount)
     return (valid_card, valid_month, valid_year, valid_pass, valid_cvv2, valid_amount)
 
-# Transaction file path constants and settings (using clean, absolute paths)
 current_dir = os.path.abspath(os.path.dirname(__file__))
 transactions_file_path = os.path.normpath(os.path.join(current_dir, "../../data/transactions.txt"))
 
@@ -90,7 +83,6 @@ class StorageError(Exception):
     """خطای اختصاصی برای مشکلات مربوط به ذخیره‌سازی و خواندن فایل‌ها"""
     pass
 
-# Private file storage and reading functions
 def _append_line(line):
     """افزودن یک خط به انتهای فایل تراکنش‌ها با رمزگذاری utf-8"""
     try:
@@ -112,7 +104,6 @@ def _read_lines():
     except OSError:
         raise StorageError("خطا در خواندن فایل از روی دیسک.") from None
 
-# loading transactions with a strict treatment to the corrupt lines
 def _load_transactions(strict=False):
     """بارگذاری تمام تراکنش‌های فایل با قابلیت سخت‌گیری در برابر خطوط خراب"""
     lines = _read_lines()
@@ -130,7 +121,10 @@ def _load_transactions(strict=False):
             continue
     return transactions
 
-# Calculating user balance based on transactions (with a fix to strip the username)
+def get_all_transactions(strict=False):
+    """دریافت همه‌ی تراکنش‌ها (برای گزارش‌ها و تطبیق اشتراک‌ها)"""
+    return _load_transactions(strict=strict)
+
 def get_balance(username):
     """محاسبه موجودی فعلی کاربر از روی تاریخچه تراکنش‌ها (شارژ مثبت، اشتراک منفی)"""
     if not isinstance(username, str) or not username.strip():
@@ -148,7 +142,6 @@ def get_balance(username):
         raise StorageError("موجودی حساب منفی است که نشان‌دهنده ناسازگاری در داده‌های ذخیره‌شده است.")
     return balance
 
-# Creating the wallet object (with the parameter name changed to 'balance')
 def get_wallet(username):
     """دریافت شیء کیف پول حاوی موجودی به‌دست‌آمده از تراکنش‌ها"""
     if not isinstance(username, str) or not username.strip():
@@ -157,7 +150,6 @@ def get_wallet(username):
     current_balance = get_balance(username)
     return Wallet(username, balance=current_balance)
 
-# Retrieve transactions for a specific user (with username stripping)
 def get_transactions(username):
     """دریافت لیست تراکنش‌های متعلق به کاربر بدون حساسیت به خطوط مخدوش احتمالی دیگر"""
     if not isinstance(username, str) or not username.strip():
@@ -166,30 +158,49 @@ def get_transactions(username):
     all_transactions = _load_transactions(strict=False)
     return [tx for tx in all_transactions if tx.username == username]
 
-# Public transaction record
 def record_transaction(transaction):
     """بررسی نوع تراکنش و افزودن آن به فایل"""
     if not isinstance(transaction, Transaction):
         raise ValueError("ورودی باید از نوع شیء Transaction باشد.")
     _append_line(transaction.to_line())
 
-# Wallet Top-up (Order adjusted: Transaction creation prior to bank communication)
+def _mask_receipt(card, payment_id):
+    """رسید ماسک‌شده: ۴ رقم اول کارت، ۸ ستاره، ۴ رقم آخر، سپس بقیه‌ی شناسه (مبلغ و عدد تصادفی)"""
+    if not (isinstance(card, str) and isinstance(payment_id, str)
+            and len(card) == 16 and payment_id.startswith(card) and len(payment_id) > 16):
+        raise ValueError("رسید بانکی قابل ماسک‌ شدن نیست.")
+    return card[:4] + "*" * 8 + card[-4:] + payment_id[16:]
+ 
+def new_transaction(username, transaction_type, amount, description, when=None):
+    """ساخت تراکنش با شماره پیگیری یکتا (غیرتکراری نسبت به تراکنش‌های موجود)"""
+    existing_codes = {tx.tracking_code for tx in _load_transactions(strict=True)}
+    for _ in range(10):
+        code = generate_tracking_code()
+        if code not in existing_codes:
+            return Transaction(username=username, transaction_type=transaction_type, amount=amount,
+                               description=description, date=when, tracking_code=code)
+    raise StorageError("ساخت شماره پیگیری یکتا ممکن نشد.")
+
 def charge_wallet(username, card, month, year, password, cvv2, amount):
     """شارژ کیف پول با اعتبارسنجی ورودی، تراکنش بانکی و ثبت در فایل"""
-    # Payment Input Validation
     valid_card, valid_month, valid_year, valid_pass, valid_cvv2, valid_amount = validate_payment_inputs(card, month, year, password, cvv2, amount)
-    # Creating a top-up transaction (to verify the username before communicating with the bank)
-    transaction = Transaction(username=username, transaction_type="charge", amount=valid_amount, description="شارژ کیف پول")
-    # Connection to the bank gateway
+    transaction = new_transaction(username, "charge", valid_amount, "شارژ کیف پول")
     try:
         payment_result = API().pay(valid_card, valid_month, valid_year, valid_pass, valid_cvv2, valid_amount)
     except ValueError:
         raise ValueError("اطلاعات کارت توسط بانک تأیید نشد.") from None
     if not payment_result:
         raise ValueError("تراکنش بانکی ناموفق بود.")
-    # Logging the transaction to a file (handling `from None` in case of a disk error)
     try:
-        record_transaction(transaction)
-    except StorageError:
-        raise StorageError("پرداخت انجام شد ولی ثبت نشد، به مدیر اطلاع دهید.") from None
+        transaction.attach_receipt(_mask_receipt(valid_card, payment_result))
+    except ValueError:
+        pass
+    for attempt in range(2):
+        try:
+            record_transaction(transaction)
+            break
+        except StorageError:
+            if attempt == 1:
+                reference = transaction.receipt or transaction.tracking_code
+                raise StorageError(f"پرداخت انجام شد ولی ثبت نشد. دوباره پرداخت نکنید و این رسید را به مدیر اعلام کنید: {reference}") from None
     return transaction
