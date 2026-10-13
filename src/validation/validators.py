@@ -22,7 +22,10 @@ def validate_username(username):
 def validate_name(name):
     if not isinstance(name,str) or not name:
         return False
+    name = name.strip()
     pattern = r"^[a-zA-Zآ-ی\s]{3,}$"
+    if len(name) < 3:
+        return False
     return re.fullmatch(pattern,name) is not None
 def validate_no_forbidden_chars(value):
     if not isinstance(value,str):
