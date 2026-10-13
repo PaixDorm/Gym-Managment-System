@@ -23,7 +23,7 @@ def validate_name(name):
     if not isinstance(name,str) or not name:
         return False
     name = name.strip()
-    pattern = r"^[a-zA-Zآ-ی\s]{3,}$"
+    pattern = r"^[a-zA-Z\u0600-\u06FF\s]{3,}$"
     if len(name) < 3:
         return False
     return re.fullmatch(pattern,name) is not None
