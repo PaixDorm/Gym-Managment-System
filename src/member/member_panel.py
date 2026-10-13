@@ -1,7 +1,7 @@
-from models.file_helper import read_lines
-from member.enrollment_manager import EnrollmentManager
-from coach.workout_manager import WorkoutManager
-from models.subscription import check_subscription
+from src.models.file_helper import read_lines
+from src.member.enrollment_manager import EnrollmentManager
+from src.coach.workout_manager import WorkoutManager
+from src.models.subscription import check_subscription
 
 CLASSES_FILE = "classes.txt"
 

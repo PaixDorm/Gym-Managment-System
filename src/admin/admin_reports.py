@@ -1,4 +1,4 @@
-from models.file_helper import read_lines
+from src.models.file_helper import read_lines
 
 ENROLLMENTS_FILE = "enrollments.txt"
 

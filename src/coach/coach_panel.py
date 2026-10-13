@@ -1,6 +1,6 @@
-from models.file_helper import read_lines
-from coach.workout_manager import WorkoutManager
-from models.workout import Exercise
+from src.models.file_helper import read_lines
+from src.coach.workout_manager import WorkoutManager
+from src.models.workout import Exercise
 
 CLASSES_FILE = "classes.txt"
 

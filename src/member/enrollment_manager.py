@@ -1,5 +1,5 @@
-from models.file_helper import read_lines, write_lines
-from models.enrollment import Enrollment
+from src.models.file_helper import read_lines, write_lines
+from src.models.enrollment import Enrollment
 
 ENROLLMENTS_FILE = "enrollments.txt"
 
@@ -43,7 +43,7 @@ class EnrollmentManager:
             raise PermissionError("ظرفیت این کلاس پر است")
         if not is_subscription_active:
             raise PermissionError("اشتراک شما فعال نیست")
-        if self.is_member_in_class(username, class_id):
+        if self.is_member_enrolled_in_this_class(username, class_id):
             raise PermissionError("شما قبلاً در این کلاس ثبت نام کرده اید")
 
         new_enroll = Enrollment.new_enrollment(username, class_id)

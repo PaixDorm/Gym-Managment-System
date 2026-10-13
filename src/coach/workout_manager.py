@@ -1,5 +1,5 @@
-from models.file_helper import read_lines, write_lines
-from models.workout import Exercise
+from src.models.file_helper import read_lines, write_lines
+from src.models.workout import Exercise
 
 WORKOUTS_FILE = "workouts.txt"
 
@@ -44,6 +44,6 @@ class WorkoutManager:
 
     def add_exercise(self, class_id, member_username, coach_username, exercise):
         before = self.get_exercises(class_id, member_username)
-        after = before.append(exercise)
+        before.append(exercise)
 
-        self.save_exercises(class_id, member_username, coach_username, after)
+        self.save_exercises(class_id, member_username, coach_username, before)
