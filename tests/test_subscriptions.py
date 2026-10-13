@@ -16,7 +16,7 @@ D = date
 
 @pytest.fixture
 def env(tmp_path, monkeypatch):
-    monkeypatch.setattr(wm, "TRANSACTIONS_FILE_PATH", str(tmp_path / "transactions.txt"))
+    monkeypatch.setattr(wm, "transactions_file_path", str(tmp_path / "transactions.txt"))
     monkeypatch.setattr(sm, "subscription_file_path", str(tmp_path / "subscriptions.txt"))
     monkeypatch.setattr(sm, "subscription_plans", dict(sm.subscription_plans))   # جدا از طرح‌های واقعی
     return tmp_path
@@ -151,8 +151,8 @@ def test_transaction_write_failure_charges_nothing_and_pending_row_is_ignored(en
     with pytest.raises(wm.StorageError):
         sm.buy_subscription("sara_k", 1, today=D(2026, 10, 10))
     assert wm.get_balance("sara_k") == 500000
-    assert count(env / "subscriptions.txt") == 1                       # ردیف معلق روی دیسک هست
-    assert sm.get_user_subscriptions("sara_k") == []                   # ولی پرداخت‌نشده است و حساب نمی‌شود
+    assert count(env / "subscriptions.txt") == 1                      
+    assert sm.get_user_subscriptions("sara_k") == []              
     assert sm.get_subscription_state("sara_k", D(2026, 10, 12)) == "none"
     assert sm.get_total_revenue() == 0
 

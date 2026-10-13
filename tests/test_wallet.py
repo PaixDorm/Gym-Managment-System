@@ -25,7 +25,7 @@ class CountingBank:
 @pytest.fixture
 def files(tmp_path, monkeypatch):
     path = tmp_path / "transactions.txt"
-    monkeypatch.setattr(wm, "TRANSACTIONS_FILE_PATH", str(path))
+    monkeypatch.setattr(wm, "transactions_file_path", str(path))
     return path
 
 def lines(path):

@@ -109,14 +109,15 @@ class Subscription:
             self.start_date.isoformat(),
             self.payment_date.isoformat()
         ]
-        return "|".join(parts)
+        return " | ".join(parts)
+    
     @classmethod
     def from_line(cls, line):
         """ساخت شیء اشتراک از روی یک خط متنی ذخیره‌شده"""
         if not isinstance(line, str):
             raise ValueError("خط ورودی باید از نوع رشته باشد.")
         line = line.strip()
-        parts = line.split("|")        
+        parts = line.split(" | ")        
         if len(parts) != 6:
             raise ValueError("تعداد اجزای خط اشتراک نامعتبر است؛ باید دقیقاً ۶ بخش باشد.")
         tracking_code, username, months_str, amount_str, start_date_str, payment_date_str = parts
