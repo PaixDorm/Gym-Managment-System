@@ -21,7 +21,7 @@ class WorkoutManager:
                     number_of_sets = int(information[4]),
                     number_of_repeats = int(information[5]),
                     rest_time = int(information[6]),
-                    exercise_description = exercise_description,
+                    exercise_description = exercise_description
                 )
                 result.append(exercise)
 
