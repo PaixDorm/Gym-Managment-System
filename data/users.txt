@@ -1,0 +1,2 @@
+Ali Rezaei	ali_test	Test@123	ali_test@example.com	coach	True
+amirmahdi	amir	Gym@1234	amirmahdi@gmail.com	manager	True

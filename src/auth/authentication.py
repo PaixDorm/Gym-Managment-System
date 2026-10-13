@@ -15,9 +15,6 @@ def authenticate_user(username, password, role, users):
             else :
                 return {"success": False,"username": None,"role":None}
     return {"success": False, "username": None, "role": None}
-users = [{"username":"amir", "password":"amir@1234","role":"coach", "active":True},
-         {"username": "ali", "password": "ali@1234", "role": "member", "active": False },
-         {"username": "zahra", "password": "zahra@1234", "role": "manager", "active": True }]
 def login(role,users):
     while True:
         username = input("یوزرنیم خود را وارد کنید : ")
