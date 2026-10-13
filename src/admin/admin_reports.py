@@ -37,15 +37,15 @@ def most_popular_classes():
 
     return most_populars
 
-TRANSACTIONS_FILE = "transactions.txt"
+SUBSCRIPTIONS_FILE = "subscriptions.txt"
 
 def income_by_subscription_type():
 
     result = {}
 
-    for information in read_lines(TRANSACTIONS_FILE):
+    for information in read_lines(SUBSCRIPTIONS_FILE):
         information = information.split(" | ")
-        subscription_type = information[2]
+        subscription_type = information[2] + "months"
         subscription_amount = int(information[3])
 
         if subscription_type in result:
