@@ -86,19 +86,51 @@ class Subscription:
         return {"username": self.username, "months": self.months, "amount": self.amount, "start_date": self.start_date.isoformat(), "tracking_code": self.tracking_code, "payment_date": self.payment_date.isoformat()}
     
     @classmethod
-    def from_dict(cls, data):
-        if not isinstance(data, dict):
-            raise ValueError("داده ورودی باید از نوع دیکشنری باشد.")
-        required_keys = {"username", "months", "amount", "start_date", "tracking_code", "payment_date"}
-        if not required_keys.issubset(data.keys()):
-            raise ValueError("دیکشنری ورودی ناقص است.")
-        try:
-            start_date_obj = date.fromisoformat(data["start_date"])
-            payment_date_obj = date.fromisoformat(data["payment_date"])
-        except (TypeError, ValueError):
-            raise ValueError("فرمت رشته تاریخ در دیکشنری نامعتبر است.") from None
-        return cls(username=data["username"], months=data["months"], amount=data["amount"], start_date=start_date_obj, tracking_code=data["tracking_code"], payment_date=payment_date_obj)
-    
+    def from_line(cls, line):
+        """ساخت شیء اشتراک از روی یک خط متنی"""
+        if not isinstance(line, str):
+            raise ValueError("خط ورودی باید از نوع رشته باشد.")
+        line = line.strip()
+        parts = [part.strip() for part in line.split("|")]
+        if len(parts) == 6:
+            tracking_code, username, months_str, amount_str, start_date_str, payment_date_str = parts
+            try:
+                months = int(months_str)
+                amount = int(amount_str)
+                start_date_obj = date.fromisoformat(start_date_str)
+                payment_date_obj = date.fromisoformat(payment_date_str)
+            except (ValueError, TypeError):
+                raise ValueError("مقادیر عددی یا تاریخ در خط ورودی اشتراک نامعتبر است.") from None
+            return cls(
+                username=username,
+                months=months,
+                amount=amount,
+                start_date=start_date_obj,
+                tracking_code=tracking_code,
+                payment_date=payment_date_obj)
+        elif len(parts) == 7:
+            tracking_code, username, months_str, amount_str, start_date_str, end_date_str, payment_date_str = parts
+            try:
+                months = int(months_str)
+                amount = int(amount_str)
+                start_date_obj = date.fromisoformat(start_date_str)
+                end_date_obj = date.fromisoformat(end_date_str)
+                payment_date_obj = date.fromisoformat(payment_date_str)
+            except (ValueError, TypeError):
+                raise ValueError("مقادیر عددی یا تاریخ در خط ورودی اشتراک نامعتبر است.") from None
+            expected_end_date = start_date_obj + timedelta(days=months * days_per_month)
+            if end_date_obj != expected_end_date:
+                raise ValueError("تاریخ پایان ثبت‌شده در فایل با مدت‌زمان اشتراک مغایرت دارد.")
+            return cls(
+                username=username,
+                months=months,
+                amount=amount,
+                start_date=start_date_obj,
+                tracking_code=tracking_code,
+                payment_date=payment_date_obj)
+        else:
+            raise ValueError("تعداد اجزای خط اشتراک نامعتبر است؛ باید ۶ یا ۷ بخش باشد.")
+        
     def to_line(self):
         """تبدیل اطلاعات اشتراک به یک خط متنی جدا شده با جداکننده (بدون ذخیره تاریخ پایان)"""
         parts = [

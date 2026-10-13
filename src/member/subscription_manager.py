@@ -1,5 +1,5 @@
 import os
-from datetime import date, datetime
+from datetime import date, datetime,  time
 from src.models.transaction import Transaction
 from src.models.subscription import Subscription, SubscriptionPlan, next_start_date, month_to_persian
 from src.models.wallet import InsufficientBalanceError
@@ -140,48 +140,93 @@ def get_days_left(username, today=None):
     return max(active, key=lambda s: s.end_date).days_left(today)
 
 def buy_subscription(username, months, today=None):
-    """خرید یا تمدید اشتراک با رعایت کامل اصول ایمنی مالی و Idempotency"""
+    """خرید یا تمدید اشتراک با ثبت معلق اولیه و مدیریت ایمن تراکنش مالی"""
     if not isinstance(username, str) or not username.strip():
         raise ValueError("نام کاربری نامعتبر است.")
     username = username.strip()
-    if today is not None and type(today) is not date:
+    supplied_today = today is not None
+    if supplied_today and type(today) is not date:
         raise ValueError("تاریخ امروز باید از نوع date باشد.")
+    if today is None:
+        today = date.today()
+    when = (
+        datetime.combine(today, time.min)
+        if supplied_today
+        else datetime.now().replace(microsecond=0))
     plan = get_plan(months)
+    all_subs = _load_subscriptions(strict=True)
+    all_tx = get_all_transactions()
+    paid_codes = {
+        tx.tracking_code
+        for tx in all_tx
+        if tx.transaction_type == "subscription"}
+    pending = next((
+            s for s in all_subs
+            if s.username == username
+            and s.months == months
+            and s.tracking_code not in paid_codes
+        ), None)
+    if pending is not None:
+        sub = pending
+        amount = sub.amount
+        tx = Transaction(
+            username=username,
+            transaction_type="subscription",
+            amount=amount,
+            description=f"خرید اشتراک {plan.title}",
+            tracking_code=sub.tracking_code,
+            date=(
+                datetime.combine(sub.payment_date, time.min)
+                if supplied_today
+                else when
+            ))
+    else:
+        amount = plan.price
+        latest = get_latest_subscription(username)
+        start = next_start_date(latest, today)
+        used_codes = {
+            s.tracking_code for s in all_subs}
+        tx = None
+        for _ in range(10):
+            temp_tx = Transaction(
+                username=username,
+                transaction_type="subscription",
+                amount=amount,
+                description=f"خرید اشتراک {plan.title}")
+            if temp_tx.tracking_code not in used_codes:
+                tx = temp_tx
+                break
+        else:
+            raise StorageError("شماره پیگیری یکتا ساخته نشد.")
+        sub = Subscription(
+            username=username,
+            months=months,
+            amount=amount,
+            start_date=start,
+            tracking_code=tx.tracking_code,
+            payment_date=today)
     wallet = get_wallet(username)
-    if not wallet.has_enough(plan.price):
-        raise InsufficientBalanceError(f"موجودی کیف پول برای خرید این اشتراک کافی نیست. موجودی: {wallet.balance}, مبلغ: {plan.price}")
-    latest_sub = get_latest_subscription(username)
-    start_date = next_start_date(latest_sub, today)
-    description = f"خرید اشتراک {plan.title}"
-    if "|" in description or "\n" in description or "\r" in description:
-        raise ValueError("توضیحات تراکنش شامل کاراکترهای غیرمجاز است.")
-    tx = Transaction(username=username, transaction_type="subscription", amount=plan.price, description=description)
-    existing_subs = _load_subscriptions(strict=False)
-    existing_txs = get_all_transactions()
-    matching_tx = next((t for t in existing_txs if t.tracking_code == tx.tracking_code), None)
-    matching_sub = next((s for s in existing_subs if s.tracking_code == tx.tracking_code), None)
-    if matching_sub:
-        return matching_sub
-    wallet.withdraw(plan.price)
-    if not matching_tx:
+    if not wallet.has_enough(amount):
+        raise InsufficientBalanceError("موجودی کیف پول کافی نیست.")
+    if pending is None:
         try:
-            record_transaction(tx)
-        except Exception:
-            raise StorageError("خطا در ثبت تراکنش خرید اشتراک روی دیسک.") from None
-    try:
-        if not matching_sub:
-            sub = Subscription(username=username, months=months, amount=plan.price, start_date=start_date, tracking_code=tx.tracking_code, payment_date=today if today is not None else date.today())
             _append_subscription(sub)
-        else:
-            sub = matching_sub
-    except StorageError:        
-        current_subs = _load_subscriptions(strict=False)
-        already_saved = any(s.tracking_code == tx.tracking_code for s in current_subs)        
-        if already_saved:
-
-            pass
-        else:
-            raise StorageError(f"پرداخت انجام شد ولی اشتراک ثبت نشد، شماره پیگیری: {tx.tracking_code}") from None
+        except StorageError:
+            persisted = next((s for s in _load_subscriptions(strict=True) if s.tracking_code == sub.tracking_code), None)
+            if persisted is None:
+                raise StorageError("ثبت اشتراک انجام نشد؛ مبلغی کسر نشد.") from None
+            sub = persisted
+    try:
+        record_transaction(tx)
+    except StorageError:
+        recorded = next((t for t in get_all_transactions() if t.tracking_code == tx.tracking_code), None)
+        if recorded is None:
+            raise StorageError(f"خرید معلق ماند و مبلغی کسر نشد. شماره پیگیری: {tx.tracking_code}") from None
+        if (recorded.username != username or recorded.transaction_type != "subscription" or recorded.amount != amount):
+            raise StorageError("شماره پیگیری با تراکنش نامرتبط تداخل دارد.")
+    recorded = next((t for t in get_all_transactions() if t.tracking_code == tx.tracking_code), None)
+    if (recorded is None or recorded.username != username or recorded.transaction_type != "subscription" or recorded.amount != amount):
+        raise StorageError("پرداخت هنوز تأیید نشده؛ از پرداخت مجدد خودداری کنید.")
     return sub
 
 def get_all_subscriptions():
