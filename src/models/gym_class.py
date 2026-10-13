@@ -11,10 +11,8 @@ class GymClass:
             raise ValueError("رشته ورزشی نباید خالی باشد ")
         self.sport = sport
 
-        if type(coach) is not int:
-            raise ValueError("لطفا مقدار معتبر وارد کنید")
-        if coach <= 0:
-            raise ValueError("لطفا مقدار صحیح را وارد کنید")
+        if not isinstance(coach, str) or not coach.strip():
+           raise ValueError("نام کاربری مربی معتبر نیست")
         self.coach = coach
 
         if not isinstance(time, Time):
