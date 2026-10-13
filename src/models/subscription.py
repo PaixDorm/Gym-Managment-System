@@ -61,7 +61,7 @@ class Subscription:
         self.payment_date = payment_date
     
     @property
-    def end_date(self):
+    def end_date(self): 
         return self.start_date + timedelta(days=self.months * days_per_month)
     
     def is_active(self, today=None):
@@ -107,20 +107,21 @@ class Subscription:
             str(self.months),
             str(self.amount),
             self.start_date.isoformat(),
+            self.end_date.isoformat(),
             self.payment_date.isoformat()
         ]
         return " | ".join(parts)
     
     @classmethod
     def from_line(cls, line):
-        """ساخت شیء اشتراک از روی یک خط متنی ذخیره‌شده"""
+        """ساخت شیء اشتراک از روی یک خط متنی ذخیره‌شده (با احتساب ۷ بخش)"""
         if not isinstance(line, str):
             raise ValueError("خط ورودی باید از نوع رشته باشد.")
         line = line.strip()
-        parts = line.split(" | ")        
-        if len(parts) != 6:
-            raise ValueError("تعداد اجزای خط اشتراک نامعتبر است؛ باید دقیقاً ۶ بخش باشد.")
-        tracking_code, username, months_str, amount_str, start_date_str, payment_date_str = parts
+        parts = line.split(" | ")
+        if len(parts) != 7:
+            raise ValueError("تعداد اجزای خط اشتراک نامعتبر است؛ باید دقیقاً ۷ بخش باشد.")
+        tracking_code, username, months_str, amount_str, start_date_str, end_date_str, payment_date_str = parts
         try:
             months = int(months_str)
             amount = int(amount_str)
@@ -128,9 +129,13 @@ class Subscription:
             raise ValueError("مقادیر عددی ماه یا مبلغ در خط ورودی معتبر نیستند.") from None
         try:
             start_date_obj = date.fromisoformat(start_date_str)
+            end_date_obj = date.fromisoformat(end_date_str)
             payment_date_obj = date.fromisoformat(payment_date_str)
         except ValueError:
             raise ValueError("فرمت تاریخ در خط ورودی اشتراک نامعتبر است.") from None
+        expected_end_date = start_date_obj + timedelta(days=months * days_per_month)
+        if end_date_obj != expected_end_date:
+            raise ValueError("تاریخ پایان ثبت‌شده در فایل با مدت‌زمان اشتراک مغایرت دارد.")
         return cls(username=username, months=months, amount=amount, start_date=start_date_obj, tracking_code=tracking_code, payment_date=payment_date_obj)
 
 def next_start_date(latest_subscription, today=None):

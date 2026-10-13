@@ -159,9 +159,12 @@ def get_transactions(username):
     return [tx for tx in all_transactions if tx.username == username]
 
 def record_transaction(transaction):
-    """بررسی نوع تراکنش و افزودن آن به فایل"""
+    """بررسی نوع تراکنش و افزودن آن به فایل با جلوگیری از ثبت تکراری"""
     if not isinstance(transaction, Transaction):
         raise ValueError("ورودی باید از نوع شیء Transaction باشد.")
+    existing_transactions = _load_transactions(strict=False)
+    if any(tx.tracking_code == transaction.tracking_code for tx in existing_transactions):
+        return
     _append_line(transaction.to_line())
 
 def _mask_receipt(card, payment_id):

@@ -1,5 +1,6 @@
 import os
 from datetime import date, datetime
+from src.models.transaction import Transaction
 from src.models.subscription import Subscription, SubscriptionPlan, next_start_date, month_to_persian
 from src.models.wallet import InsufficientBalanceError
 from src.member.wallet_manager import (get_wallet, record_transaction, new_transaction, get_all_transactions, StorageError)
@@ -139,31 +140,48 @@ def get_days_left(username, today=None):
     return max(active, key=lambda s: s.end_date).days_left(today)
 
 def buy_subscription(username, months, today=None):
-    """
-    خرید یا تمدید اشتراک. ترتیب نوشتن: اول ردیف اشتراک (معلق)، بعد تراکنش پرداخت (نهایی‌کننده).
-    اگر هر کدام خطا بدهد، پولی کم نشده و ردیف معلق نادیده گرفته می‌شود؛ تلاش مجدد فقط یک بار پول کم می‌کند.
-    """
-    username = _clean_username(username)
-    today = None if today is None else _resolve_today(today)
+    """خرید یا تمدید اشتراک با رعایت کامل اصول ایمنی مالی و Idempotency"""
+    if not isinstance(username, str) or not username.strip():
+        raise ValueError("نام کاربری نامعتبر است.")
+    username = username.strip()
+    if today is not None and type(today) is not date:
+        raise ValueError("تاریخ امروز باید از نوع date باشد.")
     plan = get_plan(months)
-
     wallet = get_wallet(username)
     if not wallet.has_enough(plan.price):
         raise InsufficientBalanceError(f"موجودی کیف پول برای خرید این اشتراک کافی نیست. موجودی: {wallet.balance}, مبلغ: {plan.price}")
- 
-    now = datetime.now().replace(microsecond=0)
-    when = datetime.combine(today, now.time()) if today is not None else now
-    payment_day = when.date()
     latest_sub = get_latest_subscription(username)
-    start_date = next_start_date(latest_sub, payment_day)
- 
-    tx = new_transaction(username, "subscription", plan.price, f"خرید اشتراک {plan.title}", when)
-    sub = Subscription(username=username, months=months, amount=plan.price, start_date=start_date, tracking_code=tx.tracking_code, payment_date=payment_day)
+    start_date = next_start_date(latest_sub, today)
+    description = f"خرید اشتراک {plan.title}"
+    if "|" in description or "\n" in description or "\r" in description:
+        raise ValueError("توضیحات تراکنش شامل کاراکترهای غیرمجاز است.")
+    tx = Transaction(username=username, transaction_type="subscription", amount=plan.price, description=description)
+    existing_subs = _load_subscriptions(strict=False)
+    existing_txs = get_all_transactions()
+    matching_tx = next((t for t in existing_txs if t.tracking_code == tx.tracking_code), None)
+    matching_sub = next((s for s in existing_subs if s.tracking_code == tx.tracking_code), None)
+    if matching_sub:
+        return matching_sub
+    wallet.withdraw(plan.price)
+    if not matching_tx:
+        try:
+            record_transaction(tx)
+        except Exception:
+            raise StorageError("خطا در ثبت تراکنش خرید اشتراک روی دیسک.") from None
     try:
-        _append_subscription(sub)
-        record_transaction(tx)
-    except StorageError:
-        raise StorageError("خرید انجام نشد؛ مبلغی کسر نشد. دوباره تلاش کنید.") from None
+        if not matching_sub:
+            sub = Subscription(username=username, months=months, amount=plan.price, start_date=start_date, tracking_code=tx.tracking_code, payment_date=today if today is not None else date.today())
+            _append_subscription(sub)
+        else:
+            sub = matching_sub
+    except StorageError:        
+        current_subs = _load_subscriptions(strict=False)
+        already_saved = any(s.tracking_code == tx.tracking_code for s in current_subs)        
+        if already_saved:
+
+            pass
+        else:
+            raise StorageError(f"پرداخت انجام شد ولی اشتراک ثبت نشد، شماره پیگیری: {tx.tracking_code}") from None
     return sub
 
 def get_all_subscriptions():
