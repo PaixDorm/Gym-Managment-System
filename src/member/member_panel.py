@@ -160,5 +160,5 @@ class MemberPanel:
             for exercise in exercises:
                 print(" -", exercise)
 
-                if exercise.description:
-                    print("   توضیحات مربوطه:", exercise.description)
+                if exercise.exercise_description:
+                    print("   توضیحات مربوطه:", exercise.exercise_description)

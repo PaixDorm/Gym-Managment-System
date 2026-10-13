@@ -11,7 +11,7 @@ def read_lines(filename):
     if not os.path.exists(path):
         return []
     
-    with open(path, "r") as file:
+    with open(path, "r", encoding = "UTF-8") as file:
         lines = []
 
         for line in file:
@@ -25,13 +25,13 @@ def write_lines(filename, lines):
     os.makedirs(DATA_DIR, exist_ok = True)
     path = full_path(filename)
 
-    with open(path, "w") as file:
+    with open(path, "w", encoding = "UTF-8") as file:
         for line in lines:
             file.write(f"{line}\n")
 
 def append_line(filename, line):
     os.makedirs(DATA_DIR, exist_ok = True)
     path = full_path(filename)
-    
-    with open(path, "a") as file:
+
+    with open(path, "a", encoding = "UTF-8") as file:
         file.write(f"{line}\n")
