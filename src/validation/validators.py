@@ -12,7 +12,7 @@ def validate_password(password):
 def validate_email(email):
     if not isinstance(email,str) or not email:
         return False
-    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
     return re.fullmatch(pattern,email) is not None
 def validate_username(username):
     if not isinstance(username,str) or not username:
