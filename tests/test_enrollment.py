@@ -29,8 +29,8 @@ def test_enroll_no_subscription():
 
 def test_enrollment_model():
     from src.models.enrollment import Enrollment
-    e = Enrollment.make_new("sara", "C1")
-    assert e.status == "active"
+    e = Enrollment.new_enrollment("sara", "C1")
+    assert e.enrollment_status == "active"
     assert e.tracking_number.isdigit()
-    e.cancel()
-    assert e.status == "cancelled"
+    e.enrollment_cancelling()
+    assert e.enrollment_status == "cancelled"

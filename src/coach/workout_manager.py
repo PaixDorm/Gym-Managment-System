@@ -13,7 +13,7 @@ class WorkoutManager:
             if len(information) == 8:
                 exercise_description = information[7]
             else:
-                exercise_description = ""
+                exercise_description = "---"
 
             if information[0] == class_id and information[1] == member_username:
                 exercise = Exercise(

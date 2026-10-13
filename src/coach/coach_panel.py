@@ -147,6 +147,9 @@ class CoachPanel:
             rest_time = int(input("مدت زمان استراحت موردنظر (برحسب ثانیه): "))
             exercise_description = input("توضیحات مربوطه (اختیاری): ").strip()
 
+            if exercise_description == "":
+                exercise_description = "---"
+
             exercise = Exercise(exercise_name, number_of_sets, number_of_repeats, rest_time, exercise_description)
             self.workouts.add_exercise(class_id, member, self.coach, exercise)
             print("حرکت اضافه شد")
@@ -167,6 +170,9 @@ class CoachPanel:
                 number_of_repeats = int(input("تعداد تکرارهای موردنظر: "))
                 rest_time = int(input("مدت زمان استراحت موردنظر (برحسب ثانیه): "))
                 exercise_description = input("توضیحات مربوطه (اختیاری): ").strip()
+
+                if exercise_description == "":
+                    exercise_description = "---"
 
                 exercises.append(Exercise(exercise_name, number_of_sets, number_of_repeats, rest_time, exercise_description))
             except ValueError as exception:

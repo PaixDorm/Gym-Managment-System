@@ -1,5 +1,5 @@
 class Exercise:
-    def __init__(self, exercise_name, number_of_sets, number_of_repeats, rest_time, exercise_description):
+    def __init__(self, exercise_name, number_of_sets, number_of_repeats, rest_time, exercise_description = "---"):
         if exercise_name.strip() == "":
             raise ValueError("نام حرکت نمی تواند خالی باشد")
         if not number_of_sets > 0:
@@ -20,7 +20,7 @@ class Exercise:
         if len(information) == 5:
             exercise_description = information[4]
         else:
-            exercise_description = ""
+            exercise_description = "---"
 
         return Exercise(
             exercise_name = information[0],

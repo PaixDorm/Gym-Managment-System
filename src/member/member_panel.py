@@ -1,7 +1,7 @@
 from src.models.file_helper import read_lines
 from src.member.enrollment_manager import EnrollmentManager
 from src.coach.workout_manager import WorkoutManager
-from src.models.subscription import check_subscription
+from datetime import date
 
 CLASSES_FILE = "classes.txt"
 
@@ -39,6 +39,16 @@ def get_class_by_id(class_id):
         
     return None
 
+SUBSCRIPTIONS_FILE = "subscriptions.txt"
+
+def check_subscription_active(username):
+    for information in read_lines(SUBSCRIPTIONS_FILE):
+        information = information.split(" | ")
+        if information[1] == username and information[5] > date.today().isoformat():
+            return True
+
+    return False
+
 class MemberPanel:
     def __init__(self, username):
         self.username = username
@@ -58,9 +68,9 @@ class MemberPanel:
             choice = input("گزینۀ موردنظر: ").strip()
 
             if choice == "1":
-                pass
+                self.my_profile_and_subscription_status()
             elif choice == "2":
-                pass
+                self.my_wallet()
             elif choice == "3":
                 self.view_available_classes()
             elif choice == "4":
@@ -71,6 +81,12 @@ class MemberPanel:
                 return
             else:
                 print("این گزینه نامعتبر است")
+
+    def my_profile_and_subscription_status(self):
+        pass
+
+    def my_wallet(self):
+        pass
 
     def view_available_classes(self):
         classes = get_all_classes()
@@ -110,8 +126,8 @@ class MemberPanel:
             return
 
         try:
-            subscription_active = check_subscription(self.username)
-            enrollment = self.enrollments.enroll(self.username, class_id, cls, subscription_active)
+            is_subscription_active = check_subscription_active(self.username)
+            enrollment = self.enrollments.enroll(self.username, class_id, cls, is_subscription_active)
             print("ثبت نام شما با موفقیت انجام شد. شماره پیگیری:", enrollment.tracking_number)
         except PermissionError as error:
             print("شما نمی توانید ثبت نام کنید:", error)
@@ -161,4 +177,4 @@ class MemberPanel:
                 print(" -", exercise)
 
                 if exercise.exercise_description:
-                    print("   توضیحات مربوطه:", exercise.exercise_description)
+                    print(f"   توضیحات مربوطه: {exercise.exercise_description}")
