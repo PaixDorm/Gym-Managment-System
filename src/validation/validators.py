@@ -24,5 +24,9 @@ def validate_name(name):
         return False
     pattern = r"^[a-zA-Zآ-ی\s]{3,}$"
     return re.fullmatch(pattern,name) is not None
+def validate_no_forbidden_chars(value):
+    if not isinstance(value,str):
+        return False
+    return "\t" not in value and "\n" not in value
 
         
