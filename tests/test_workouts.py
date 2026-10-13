@@ -27,5 +27,5 @@ def test_to_line_and_from_parts():
     line = e.to_text()
     parts = line.split(" | ")
     e2 = Exercise.exercise_information(parts)
-    assert e2.name == "Push-up"
-    assert e2.sets == 3
+    assert e2.exercise_name == "Push-up"
+    assert e2.number_of_sets == 3

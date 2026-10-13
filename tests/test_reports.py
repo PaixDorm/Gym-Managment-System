@@ -6,12 +6,24 @@ def test_most_popular_empty(tmp_path, monkeypatch):
     assert rep.most_popular_classes() is None
 
 
-def test_most_popular(monkeypatch):
+def test_most_popular1(monkeypatch):
     fake = [
-        "sara|A|2025-01-01|1|active",
-        "reza|A|2025-01-02|2|active",
-        "ali|B|2025-01-03|3|active",
+        "sara | A | 2025-01-01 | 1 | active",
+        "reza | A | 2025-01-02 | 2 | active",
+        "ali | B | 2025-01-03 | 3 | active",
     ]
     monkeypatch.setattr(rep, "read_lines", lambda f: fake if f == "enrollments.txt" else [])
-    assert rep.most_popular_classes() == "A"
+    assert rep.most_popular_classes() == ["A"]
     assert rep.enrollments_per_class() == {"A": 2, "B": 1}
+
+
+def test_most_popular2(monkeypatch):
+    fake = [
+        "sara | A | 2025-01-01 | 1 | active",
+        "reza | A | 2025-01-02 | 2 | active",
+        "ali | B | 2025-01-03 | 3 | active",
+        "maryam | B | 2025-01-04 | 4 | active",
+    ]
+    monkeypatch.setattr(rep, "read_lines", lambda f: fake if f == "enrollments.txt" else [])
+    assert rep.most_popular_classes() == ["A", "B"]
+    assert rep.enrollments_per_class() == {"A": 2, "B": 2}

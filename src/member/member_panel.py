@@ -1,7 +1,7 @@
 from src.models.file_helper import read_lines
 from src.member.enrollment_manager import EnrollmentManager
 from src.coach.workout_manager import WorkoutManager
-from datetime import date
+from src.member.subscription_manager import has_active_subscription
 
 CLASSES_FILE = "classes.txt"
 
@@ -38,16 +38,6 @@ def get_class_by_id(class_id):
             return cls
         
     return None
-
-SUBSCRIPTIONS_FILE = "subscriptions.txt"
-
-def check_subscription_active(username):
-    for information in read_lines(SUBSCRIPTIONS_FILE):
-        information = information.split(" | ")
-        if information[1] == username and information[5] > date.today().isoformat():
-            return True
-
-    return False
 
 class MemberPanel:
     def __init__(self, username):
@@ -126,7 +116,7 @@ class MemberPanel:
             return
 
         try:
-            is_subscription_active = check_subscription_active(self.username)
+            is_subscription_active = has_active_subscription(self.username)
             enrollment = self.enrollments.enroll(self.username, class_id, cls, is_subscription_active)
             print("ثبت نام شما با موفقیت انجام شد. شماره پیگیری:", enrollment.tracking_number)
         except PermissionError as error:
@@ -141,8 +131,10 @@ class MemberPanel:
 
         for index, member_class in enumerate(member_classes, start = 1):
             cls = get_class_by_id(member_class.class_id)
-            print(f"{index}. [{cls['id']}] {cls['title']} ({cls['sport']})")
-            print(f"   شمارۀ پیگیری شما: {member_class.tracking_number})")
+            
+            if cls:
+                print(f"{index}. [{cls['id']}] {cls['title']} ({cls['sport']})")
+                print(f"   شمارۀ پیگیری شما: {member_class.tracking_number})")
 
         try:
             index = int(input("می خواهید کدام ثبت نام خود را لغو کنید؟ (برای بازگشت عدد 0 را وارد کنید): "))

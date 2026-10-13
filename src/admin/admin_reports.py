@@ -45,7 +45,7 @@ def income_by_subscription_type():
 
     for information in read_lines(SUBSCRIPTIONS_FILE):
         information = information.split(" | ")
-        subscription_type = information[2] + "months"
+        subscription_type = information[2] + "-month subscription"
         subscription_amount = int(information[3])
 
         if subscription_type in result:

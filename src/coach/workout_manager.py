@@ -4,7 +4,7 @@ from src.models.workout import Exercise
 WORKOUTS_FILE = "workouts.txt"
 
 class WorkoutManager:
-    def get_exercises(self, class_id, member_username):
+    def get_exercises(self, class_id, member_username, coach_username = ""):
         result = []
 
         for information in read_lines(WORKOUTS_FILE):
@@ -15,7 +15,7 @@ class WorkoutManager:
             else:
                 exercise_description = "---"
 
-            if information[0] == class_id and information[1] == member_username:
+            if information[0] == class_id and information[1] == member_username and (information[2] == coach_username or coach_username == ""):
                 exercise = Exercise(
                     exercise_name = information[3],
                     number_of_sets = int(information[4]),
@@ -33,7 +33,7 @@ class WorkoutManager:
         for information in read_lines(WORKOUTS_FILE):
             separated_information = information.split(" | ")
 
-            if separated_information[0] != class_id or separated_information[1] != member_username:
+            if separated_information[0] != class_id or separated_information[1] != member_username or separated_information[2] != coach_username:
                 result.append(information)
 
         for exercise in exercises:
@@ -43,7 +43,7 @@ class WorkoutManager:
         write_lines(WORKOUTS_FILE, result)
 
     def add_exercise(self, class_id, member_username, coach_username, exercise):
-        before = self.get_exercises(class_id, member_username)
+        before = self.get_exercises(class_id, member_username, coach_username)
         before.append(exercise)
 
         self.save_exercises(class_id, member_username, coach_username, before)
