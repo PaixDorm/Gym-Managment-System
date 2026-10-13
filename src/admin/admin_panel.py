@@ -6,6 +6,7 @@ from src.admin.user_manager import (
 )
 from getpass import getpass
 from src.utils.helpers import get_valid_choice,get_non_empty_input,confirm_action
+from src.admin.hall_panel import hall_panel
 def admin_panel(username,hall_manager):
     while True :
         print("1.افزودن")
@@ -81,3 +82,5 @@ def admin_panel(username,hall_manager):
                 print("عملیات لغو شد")
         elif choice == "5":
             break
+        elif choice == "6":
+            hall_panel(hall_manager)
