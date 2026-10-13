@@ -29,7 +29,7 @@ def save_user(users):
                 raise ValueError("کاراکتر غیر مجاز")
             line = f"{user.name}\t{user.username}\t{user.password}\t{user.email}\t{user.role}\t{str(user.is_active)}\n"
             f.write(line)
-    os.replace(tmp_file,USERS_FILE)
+        os.replace(tmp_file,USERS_FILE)
 def find_username(username):
     users = load_user()
     for user in users:
