@@ -15,7 +15,12 @@ def load_user():
             if len(parts) != 6:
                 raise ValueError("سطر خراب در فایل")
             name , username,password,email,role,is_active_str = parts
-            is_active = is_active_str = "True"
+            if is_active_str == "True":
+                is_active = True
+            elif is_active_str == "False":
+                is_active = False
+            else:
+                raise ValueError("وضعیت کاربر نامعتبر است")
             user = User(name=name,username=username,password=password,email=email,role=role,is_active=is_active)
             users.append(user)
     return users
@@ -29,7 +34,7 @@ def save_user(users):
                 raise ValueError("کاراکتر غیر مجاز")
             line = f"{user.name}\t{user.username}\t{user.password}\t{user.email}\t{user.role}\t{str(user.is_active)}\n"
             f.write(line)
-        os.replace(tmp_file,USERS_FILE)
+    os.replace(tmp_file,USERS_FILE)
 def find_username(username):
     users = load_user()
     for user in users:
