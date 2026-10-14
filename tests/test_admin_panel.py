@@ -16,6 +16,20 @@ class TestAdminPanel(unittest.TestCase):
         "src.admin.admin_panel.get_valid_choice",
         side_effect=["7", "5"]
     )
+    @patch("src.admin.admin_panel.get_revenue_by_type")
+    @patch(
+        "src.admin.admin_panel.get_valid_choice",
+        side_effect=["8", "5"]
+    )
+    def test_revenue_report(self, mock_choice, mock_revenue):
+        mock_revenue.return_value = {
+            1: 100000,
+            3: 250000
+        }
+
+        admin_panel("admin_test", Mock(), Mock())
+
+        mock_revenue.assert_called_once_with()
     def test_class_menu(self, mock_choice, mock_class_panel):
         hall_manager = Mock()
         class_manager = Mock()

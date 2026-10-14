@@ -8,6 +8,7 @@ from getpass import getpass
 from src.utils.helpers import get_valid_choice,get_non_empty_input,confirm_action
 from src.admin.hall_panel import hall_panel
 from src.admin.class_panel import class_panel
+from src.member.subscription_manager import get_revenue_by_type
 def admin_panel(username, hall_manager, class_manager):
     while True :
         print("1.افزودن")
@@ -17,7 +18,8 @@ def admin_panel(username, hall_manager, class_manager):
         print("5.خروج")
         print("6.مدیریت سالن‌ها")
         print("7.مدیریت کلاس‌ها")
-        choice = get_valid_choice("عدد مورد نظر را وارد کنید : ",["1","2","3","4","5","6","7"])
+        print("8. گزارش درآمد اشتراک‌ها")
+        choice = get_valid_choice("عدد مورد نظر را وارد کنید : ",["1","2","3","4","5","6","7","8"])
         if choice == "1":
             name = get_non_empty_input("نام و نام خانوادگی: ")
             new_username = get_non_empty_input("نام کاربری: ")
@@ -88,3 +90,19 @@ def admin_panel(username, hall_manager, class_manager):
             hall_panel(hall_manager)
         elif choice == "7":
             class_panel(class_manager)
+        elif choice == "8":
+            try:
+                revenues = get_revenue_by_type()
+
+                if not revenues:
+                    print("هنوز درآمد اشتراکی ثبت نشده")
+                else:
+                    print("\n--- گزارش درآمد اشتراک‌ها ---")
+
+                    for months, amount in sorted(revenues.items()):
+                        print(f"اشتراک {months} ماهه: {amount} تومان")
+
+                    print("درآمد کل:", sum(revenues.values()), "تومان")
+
+            except (OSError, ValueError, UnicodeError) as error:
+                print("خطا در دریافت گزارش:", error)
