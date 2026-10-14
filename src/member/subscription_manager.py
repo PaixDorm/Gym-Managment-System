@@ -111,7 +111,7 @@ def get_subscription_state(username, today=None):
     today = _resolve_today(today)
     user_subs = get_user_subscriptions(username)
     if not user_subs:
-        return "inactive"
+        return "none"
     if any(sub.is_active(today) for sub in user_subs):
         return "active"
     return "expired"
@@ -254,7 +254,7 @@ def get_members_status(usernames, today=None):
     for username in cleaned:
         user_subs = [s for s in paid if s.username == username]
         if not user_subs:
-            result[username] = "inactive"
+            result[username] = "none"
         elif any(s.is_active(today) for s in user_subs):
             result[username] = "active"
         else:
