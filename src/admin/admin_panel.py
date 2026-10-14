@@ -10,6 +10,7 @@ from src.utils.helpers import get_valid_choice,get_non_empty_input,confirm_actio
 from src.admin.hall_panel import hall_panel
 from src.admin.class_panel import class_panel
 from src.member.subscription_manager import get_revenue_by_type
+from src.admin.subscription_panel import subscription_panel
 def admin_panel(username, hall_manager, class_manager):
     while True :
         print("1.افزودن")
@@ -21,7 +22,8 @@ def admin_panel(username, hall_manager, class_manager):
         print("7.مدیریت کلاس‌ها")
         print("8. گزارش درآمد اشتراک‌ها")
         print("9. گزارش آماری باشگاه")
-        choice = get_valid_choice("عدد مورد نظر را وارد کنید : ",["1","2","3","4","5","6","7","8","9"])
+        print("10. مدیریت اشتراک‌ها و پرداخت‌ها")
+        choice = get_valid_choice("عدد مورد نظر را وارد کنید : ",["1","2","3","4","5","6","7","8","9","10"])
         if choice == "1":
             name = get_non_empty_input("نام و نام خانوادگی: ")
             new_username = get_non_empty_input("نام کاربری: ")
@@ -138,3 +140,5 @@ def admin_panel(username, hall_manager, class_manager):
 
             except (OSError, ValueError, UnicodeError) as error:
                 print("خطا در دریافت گزارش:", error)
+        elif choice == "10":
+            subscription_panel()
