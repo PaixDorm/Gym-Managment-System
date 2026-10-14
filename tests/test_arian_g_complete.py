@@ -272,7 +272,15 @@ def test_wallet_charge_forwards_user_inputs(monkeypatch):
 def test_subscription_purchase_calls_financial_module(monkeypatch):
     mod = member_module(monkeypatch)
     buy = Mock()
-    monkeypatch.setattr(mod, "get_plans", lambda: [1, 3, 6])
+    monkeypatch.setattr(
+        mod,
+        "get_plans",
+        lambda: {
+            1: SimpleNamespace(price=100000),
+            3: SimpleNamespace(price=250000),
+            6: SimpleNamespace(price=400000)
+        }
+    )
     monkeypatch.setattr(mod, "buy_subscription", buy)
     monkeypatch.setattr("builtins.input", lambda _: "3")
     mod.MemberPanel("sara").buy_or_renewal_my_subscription()

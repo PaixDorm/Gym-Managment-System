@@ -13,9 +13,10 @@ from src.member.subscription_manager import (
 from src.member.wallet_manager import (
     get_wallet,
     get_transactions,
-    charge_wallet
+    charge_wallet,
+    StorageError
 )
-
+from src.models.wallet import InsufficientBalanceError
 CLASSES_FILE = "classes.txt"
 
 def get_all_classes():
@@ -132,7 +133,8 @@ class MemberPanel:
             print(f"{transaction.transaction_type} | {transaction.amount} | {transaction.date} | {transaction.tracking_code}")
 
     def buy_or_renewal_my_subscription(self):
-        print(get_plans())
+        for months, plan in get_plans().items():
+            print(f"{months} ماهه - {plan.price:,} تومان")
 
         choice = input("گزینۀ موردنظر (از میان اعداد 1، 3، 6): ").strip()
         if choice not in ("1", "3", "6"):
@@ -143,27 +145,37 @@ class MemberPanel:
     def my_wallet(self):
         while True:
             print("\n===== کیف پول من =====")
-            print("1. مشاهدۀ موجودی من")
-            print("2. شارژ کیف پول من")
-            print("3. مشاهدۀ تراکنش های من")
-            print("4. پرداخت یا تمدید اشتراک من")
-            print("5. بازگشت به پنل عضو")
+            print("1. مشاهده موجودی")
+            print("2. شارژ کیف پول")
+            print("3. مشاهده تراکنش‌ها")
+            print("4. خرید یا تمدید اشتراک")
+            print("5. بازگشت")
+            choice = input("انتخاب: ").strip()
+            try:
+                if choice == "1":
+                    self.see_my_wallet()
 
-            choice = input("گزینۀ موردنظر: ").strip()
+                elif choice == "2":
+                    self.charge_my_wallet()
 
-            if choice == "1":
-                self.see_my_wallet()
-            elif choice == "2":
-                self.charge_my_wallet()
-            elif choice == "3":
-                self.see_my_transactions()
-            elif choice == "4":
-                self.buy_or_renewal_my_subscription()
-            elif choice == "5":
-                return
-            else:
-                print("این گزینه نامعتبر است")
+                elif choice == "3":
+                    self.see_my_transactions()
 
+                elif choice == "4":
+                    self.buy_or_renewal_my_subscription()
+
+                elif choice == "5":
+                    return
+
+                else:
+                    print("گزینه نامعتبر است")
+            except (
+                ValueError,
+                InsufficientBalanceError,
+                StorageError,
+                OSError
+            ) as error:
+                print("عملیات مالی انجام نشد:", error)
     def view_available_classes(self):
         classes = get_all_classes()
 
