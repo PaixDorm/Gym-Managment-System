@@ -1,4 +1,5 @@
 from src.models.file_helper import read_lines
+from src.member.subscription_manager import get_revenue_by_type
 
 ENROLLMENTS_FILE = "enrollments.txt"
 
@@ -40,17 +41,4 @@ def most_popular_classes():
 SUBSCRIPTIONS_FILE = "subscriptions.txt"
 
 def income_by_subscription_type():
-
-    result = {}
-
-    for information in read_lines(SUBSCRIPTIONS_FILE):
-        information = information.split(" | ")
-        subscription_type = information[2] + "-month subscription"
-        subscription_amount = int(information[3])
-
-        if subscription_type in result:
-            result[subscription_type] += subscription_amount
-        else:
-            result[subscription_type] = subscription_amount
-
-    return result
+    return get_revenue_by_type()

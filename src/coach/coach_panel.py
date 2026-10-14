@@ -108,7 +108,10 @@ class CoachPanel:
 
         try:
             index = int(input("شمارۀ عضو: "))
-            member = chosen["enrolled"][index - 1]
+            if 1 <= index <= len(chosen["enrolled"]):
+                member = chosen["enrolled"][index - 1]
+            else:
+                raise IndexError
         except (ValueError, IndexError):
             print("شمارۀ وارد شده نامعتبر است")
             return
