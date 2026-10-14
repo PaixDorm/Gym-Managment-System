@@ -20,14 +20,13 @@ CLASSES_FILE = "classes.txt"
 
 def get_all_classes():
     result = []
+    enrollmentmanager = EnrollmentManager()
 
     for information in read_lines(CLASSES_FILE):
         information = information.split(" | ")
 
-        if len(information) == 10:
-            enrolled = information[9]
-        else:
-            enrolled = []
+        if len(information) != 9:
+            raise ValueError("فرمت اطلاعات این کلاس نامعتبر است")
 
         cls = {
             "id": information[0],
@@ -39,7 +38,7 @@ def get_all_classes():
             "time": information[6],
             "capacity": int(information[7]),
             "status": information[8],
-            "enrolled": enrolled
+            "enrolled": enrollmentmanager.get_active_members(information[0])
             }
         result.append(cls)
 
@@ -47,7 +46,7 @@ def get_all_classes():
 
 def get_class_by_id(class_id):
     for cls in get_all_classes():
-        if cls["id"] == class_id:
+        if str(cls["id"]) == str(class_id):
             return cls
         
     return None

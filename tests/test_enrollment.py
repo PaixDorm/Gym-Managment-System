@@ -20,6 +20,19 @@ def test_enroll_full():
     with pytest.raises(PermissionError):
         em.enroll("sara", "C1", fake_class(cap=1, enrolled=["x"]), True)
 
+def test_enroll_full(tmp_path, monkeypatch):
+    import src.models.file_helper as file_helper
+    monkeypatch.setattr(file_helper, "DATA_DIR", str(tmp_path))
+    em = EnrollmentManager()
+    cls = {
+        "id": "1",
+        "status": "active",
+        "capacity": 1,
+        "enrolled": []
+    }
+    em.enroll("ali", "1", cls, True)
+    with pytest.raises(PermissionError):
+        em.enroll("sara", "1", cls, True)
 
 def test_enroll_no_subscription():
     em = EnrollmentManager()
