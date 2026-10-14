@@ -1,71 +1,173 @@
+from pathlib import Path
+from datetime import time
+
 from src.models.gym_class import GymClass
 from src.admin.user_manager import find_username
+
+
+CLASSES_FILE = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "classes.txt"
+)
 
 
 class ClassManager:
     def __init__(self, hall_manager):
         self.classes = {}
         self.hall_manager = hall_manager
+        self._load()
+
+    def _load(self):
+        if not CLASSES_FILE.exists():
+            return
+
+        lines = CLASSES_FILE.read_text(
+            encoding="utf-8"
+        ).splitlines()
+
+        for line in lines:
+            if not line.strip():
+                continue
+
+            fields = line.split(" | ")
+
+            if (
+                len(fields) != 9
+                or fields[8] not in ("active", "inactive")
+            ):
+                raise ValueError(
+                    "فرمت اطلاعات کلاس نامعتبر است"
+                )
+
+            (
+                class_id,
+                title,
+                sport,
+                coach,
+                hall,
+                day,
+                clock,
+                capacity,
+                status
+            ) = fields
+
+            gym_class = GymClass(
+                title=title,
+                sport=sport,
+                coach=coach,
+                time=time.fromisoformat(clock),
+                day=day,
+                hall=int(hall),
+                capacity=int(capacity),
+                status=(status == "active")
+            )
+
+            self.classes[int(class_id)] = gym_class
+
+    def _save(self):
+        CLASSES_FILE.parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        lines = []
+
+        for class_id, gym_class in self.classes.items():
+            status = (
+                "active"
+                if gym_class.status
+                else "inactive"
+            )
+
+            lines.append(
+                f"{class_id} | {gym_class.title} | "
+                f"{gym_class.sport} | {gym_class.coach} | "
+                f"{gym_class.hall} | {gym_class.day} | "
+                f"{gym_class.time.strftime('%H:%M')} | "
+                f"{gym_class.capacity} | {status}"
+            )
+
+        CLASSES_FILE.write_text(
+            "\n".join(lines) + ("\n" if lines else ""),
+            encoding="utf-8"
+        )
 
     def add_class(self, class_id, gym_class):
         if not isinstance(gym_class, GymClass):
-            raise ValueError("ورودی باید یک شیء از کلاس GymClass باشد")
+            raise ValueError(
+                "ورودی باید یک GymClass باشد"
+            )
+
+        if type(class_id) is not int or class_id <= 0:
+            raise ValueError(
+                "شناسه کلاس باید عدد مثبت باشد"
+            )
 
         if class_id in self.classes:
             raise ValueError("شناسه تکراری است")
 
         self.validate_class_resources(gym_class)
+
         self.classes[class_id] = gym_class
+        self._save()
 
     def view_classes(self):
         return self.classes
 
     def deactivate_class(self, class_id):
         if class_id not in self.classes:
-            raise ValueError("کلاس وجود ندارد")
+            raise ValueError("کلاس پیدا نشد")
 
         self.classes[class_id].status = False
+        self._save()
 
     def activate_class(self, class_id):
         if class_id not in self.classes:
-            raise ValueError("کلاس وجود ندارد")
+            raise ValueError("کلاس پیدا نشد")
 
         gym_class = self.classes[class_id]
 
         self.validate_class_resources(gym_class)
 
         gym_class.status = True
+        self._save()
 
     def edit_class(self, class_id, new_class):
-        if not isinstance(new_class, GymClass):
-            raise ValueError("کلاس جدید باید شیء GymClass باشد")
-
         if class_id not in self.classes:
-            raise ValueError("شناسه کلاس وجود ندارد")
+            raise ValueError("کلاس پیدا نشد")
+
+        if not isinstance(new_class, GymClass):
+            raise ValueError(
+                "ورودی باید یک GymClass باشد"
+            )
 
         self.validate_class_resources(new_class)
+
         self.classes[class_id] = new_class
+        self._save()
 
     def validate_class_resources(self, gym_class):
-    
         if gym_class.hall not in self.hall_manager.halls:
-            raise ValueError("سالن موردنظر پیدا نشد")
+            raise ValueError("سالن پیدا نشد")
 
-        selected_hall = self.hall_manager.halls[gym_class.hall]
+        hall = self.hall_manager.halls[gym_class.hall]
 
-        if not selected_hall.status:
+        if not hall.status:
             raise ValueError("سالن غیرفعال است")
 
-        if selected_hall.capacity < gym_class.capacity:
-            raise ValueError("ظرفیت کلاس از ظرفیت سالن بیشتر است")
+        if gym_class.capacity > hall.capacity:
+            raise ValueError(
+                "ظرفیت کلاس از سالن بیشتر است"
+            )
 
-        selected_coach = find_username(gym_class.coach)
+        coach = find_username(gym_class.coach)
 
-        if selected_coach is None:
-            raise ValueError("مربی موردنظر وجود ندارد")
-
-        if selected_coach.role != "coach":
-            raise ValueError("کاربر انتخاب‌شده مربی نیست")
-
-        if not selected_coach.is_active:
-            raise ValueError("مربی غیرفعال است")
+        if (
+            coach is None
+            or coach.role != "coach"
+            or not coach.is_active
+        ):
+            raise ValueError(
+                "مربی معتبر و فعال نیست"
+            )
