@@ -11,6 +11,7 @@ def class_panel(class_manager):
         print("2. نمایش کلاس‌ها")
         print("3. فعال/غیرفعال کردن کلاس")
         print("4. بازگشت")
+        print("5. ویرایش کلاس")
 
         choice = get_valid_choice(
             "انتخاب: ", ["1", "2", "3", "4"]
@@ -74,3 +75,39 @@ def class_panel(class_manager):
                 print("خطا:", error)
         elif choice == "4":
             break
+        elif choice == "5":
+            try:
+                class_id = int(input("شناسه کلاس: "))
+                old_class = class_manager.view_classes().get(class_id)
+
+                if old_class is None:
+                    print("کلاس پیدا نشد")
+                    continue
+
+                title = get_non_empty_input("نام جدید کلاس: ")
+                sport = get_non_empty_input("رشته ورزشی: ")
+                coach = get_non_empty_input("نام کاربری مربی: ")
+                hall = int(input("شناسه سالن: "))
+                day = get_non_empty_input("روز برگزاری: ")
+
+                clock = get_non_empty_input("ساعت (HH:MM): ")
+                class_time = datetime.strptime(clock, "%H:%M").time()
+
+                capacity = int(input("ظرفیت جدید: "))
+
+                updated_class = GymClass(
+                    title=title,
+                    sport=sport,
+                    coach=coach,
+                    time=class_time,
+                    day=day,
+                    hall=hall,
+                    capacity=capacity,
+                    status=old_class.status
+                )
+
+                class_manager.edit_class(class_id, updated_class)
+                print("کلاس با موفقیت ویرایش شد")
+
+            except (ValueError, OSError) as error:
+                print("خطا در ویرایش کلاس:", error)
