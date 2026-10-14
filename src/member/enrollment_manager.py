@@ -29,23 +29,31 @@ class EnrollmentManager:
 
         return result
 
+    def get_active_members(self, class_id):
+        result = []
+
+        for enrollment in self.all_enrollments():
+            if str(enrollment.class_id) == str(class_id) and enrollment.being_active_checking():
+                result.append(enrollment.enrolled_member)
+        return result
+
     def is_member_enrolled_in_this_class(self, username, class_id):
-        for enrollment in self.get_member_enrollments(username):
-            if enrollment.class_id == class_id:
-                return True
-        return False
+        return username in self.get_active_members(class_id)
 
     def enroll(self, username, class_id, cls, is_subscription_active):
+        if str(cls["id"]) != str(class_id):
+            raise ValueError("شناسۀ کلاس معتبر نیست")
         if cls["status"] != "active":
             raise PermissionError("این کلاس فعال نیست")
-        if not cls["capacity"] > len(cls["enrolled"]):
-            raise PermissionError("ظرفیت این کلاس پر است")
         if not is_subscription_active:
             raise PermissionError("اشتراک شما فعال نیست")
         if self.is_member_enrolled_in_this_class(username, class_id):
             raise PermissionError("شما قبلاً در این کلاس ثبت نام کرده اید")
 
-        new_enroll = Enrollment.new_enrollment(username, class_id)
+        active_members = self.get_active_members(class_id)
+        if int(cls["capacity"]) <= len(active_members):
+            raise PermissionError("ظرفیت این کلاس پر است")
+        new_enroll = Enrollment.new_enrollment(username, str(class_id))
         all_enrolls = self.all_enrollments()
         all_enrolls.append(new_enroll)
         self.save_all_enrollments(all_enrolls)
@@ -57,7 +65,7 @@ class EnrollmentManager:
         found = False
 
         for enrollment in all_enrolls:
-            if enrollment.enrolled_member == username and enrollment.class_id == class_id and enrollment.being_active_checking():
+            if enrollment.enrolled_member == username and str(enrollment.class_id) == str(class_id) and enrollment.being_active_checking():
                 enrollment.enrollment_cancelling()
                 found = True
 

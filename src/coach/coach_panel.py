@@ -1,4 +1,5 @@
 from src.models.file_helper import read_lines
+from src.member.enrollment_manager import EnrollmentManager
 from src.coach.workout_manager import WorkoutManager
 from src.models.workout import Exercise
 
@@ -6,16 +7,14 @@ CLASSES_FILE = "classes.txt"
 
 def get_all_classes_by_coach(coach_username):
     result = []
+    enrollmentmanager = EnrollmentManager()
 
     for information in read_lines(CLASSES_FILE):
         information = information.split(" | ")
 
+        if len(information) != 9:
+            raise ValueError("فرمت اطلاعات این کلاس نامعتبر است")
         if information[3] == coach_username:
-            if len(information) == 10:
-                enrolled = information[9]
-            else:
-                enrolled = []
-
             cls = {
                 "id": information[0],
                 "title": information[1],
@@ -26,7 +25,7 @@ def get_all_classes_by_coach(coach_username):
                 "time": information[6],
                 "capacity": int(information[7]),
                 "status": information[8],
-                "enrolled": enrolled
+                "enrolled": enrollmentmanager.get_active_members(information[0])
             }
             result.append(cls)
 
@@ -108,7 +107,10 @@ class CoachPanel:
 
         try:
             index = int(input("شمارۀ عضو: "))
-            member = chosen["enrolled"][index - 1]
+            if 1 <= index <= len(chosen["enrolled"]):
+                member = chosen["enrolled"][index - 1]
+            else:
+                raise IndexError
         except (ValueError, IndexError):
             print("شمارۀ وارد شده نامعتبر است")
             return
