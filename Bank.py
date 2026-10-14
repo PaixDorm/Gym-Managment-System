@@ -25,3 +25,4 @@ class API:
             return self.generate_payment_id(amount, card)
         else:
             raise ValueError('Invalid payment details.')
+
