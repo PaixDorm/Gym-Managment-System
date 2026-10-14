@@ -5,6 +5,18 @@ from src.admin.admin_panel import admin_panel
 
 
 class TestAdminPanel(unittest.TestCase):
+    def test_subscription_menu(self):
+        with (
+            patch(
+                "src.admin.admin_panel.get_valid_choice",
+                side_effect=["10", "5"]
+            ),
+            patch(
+                "src.admin.admin_panel.subscription_panel"
+            ) as mock_panel
+        ):
+            admin_panel("admin_test", Mock(), Mock())
+            mock_panel.assert_called_once_with()
 
     def test_hall_menu(self):
         hall_manager = Mock()
