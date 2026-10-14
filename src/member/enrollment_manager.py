@@ -30,11 +30,13 @@ class EnrollmentManager:
         return result
 
     def get_active_members(self, class_id):
-        return sorted({
-            enrollment.enrolled_member
-            for enrollment in self.all_enrollments()
-            if str(enrollment.class_id) == str(class_id) and enrollment.being_active_checking()
-        })
+        result = []
+
+        for enrollment in self.all_enrollments():
+            if str(enrollment.class_id) == str(class_id) and enrollment.being_active_checking():
+                result.append(enrollment.enrolled_member)
+        
+        return result
 
     def is_member_enrolled_in_this_class(self, username, class_id):
         return username in self.get_active_members(class_id)
