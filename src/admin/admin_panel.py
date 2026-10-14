@@ -2,7 +2,8 @@ from src.admin.user_manager import (
     add_user,
     edit_user,
     toggle_active,
-    view_user
+    view_user,
+    load_user
 )
 from getpass import getpass
 from src.utils.helpers import get_valid_choice,get_non_empty_input,confirm_action
@@ -19,7 +20,8 @@ def admin_panel(username, hall_manager, class_manager):
         print("6.مدیریت سالن‌ها")
         print("7.مدیریت کلاس‌ها")
         print("8. گزارش درآمد اشتراک‌ها")
-        choice = get_valid_choice("عدد مورد نظر را وارد کنید : ",["1","2","3","4","5","6","7","8"])
+        print("9. گزارش آماری باشگاه")
+        choice = get_valid_choice("عدد مورد نظر را وارد کنید : ",["1","2","3","4","5","6","7","8","9"])
         if choice == "1":
             name = get_non_empty_input("نام و نام خانوادگی: ")
             new_username = get_non_empty_input("نام کاربری: ")
@@ -103,6 +105,36 @@ def admin_panel(username, hall_manager, class_manager):
                         print(f"اشتراک {months} ماهه: {amount} تومان")
 
                     print("درآمد کل:", sum(revenues.values()), "تومان")
+
+            except (OSError, ValueError, UnicodeError) as error:
+                print("خطا در دریافت گزارش:", error)
+        elif choice == "9":
+            try:
+                users = load_user()
+
+                active_members = sum(
+                    1 for user in users
+                    if user.role == "member"
+                    and user.is_active is True
+                )
+
+                active_coaches = sum(
+                    1 for user in users
+                    if user.role == "coach"
+                    and user.is_active is True
+                )
+
+                classes = class_manager.view_classes()
+
+                active_classes = sum(
+                    1 for gym_class in classes.values()
+                    if gym_class.status is True
+                )
+
+                print("\n--- گزارش آماری باشگاه ---")
+                print("اعضای فعال:", active_members)
+                print("مربیان فعال:", active_coaches)
+                print("کلاس‌های فعال:", active_classes)
 
             except (OSError, ValueError, UnicodeError) as error:
                 print("خطا در دریافت گزارش:", error)
