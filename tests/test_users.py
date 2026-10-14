@@ -8,6 +8,14 @@ from src.validation.validators import (
     validate_username,
     validate_name)
 from src.models.user import User
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
+
+from src.admin.user_manager import (
+    save_user,
+    load_user
+)
 class TestValidators(unittest.TestCase):
     def test_password_valid(self):
         self.assertTrue(validate_password("Ali@123"))
@@ -77,3 +85,27 @@ class TestUserModel(unittest.TestCase):
         self.assertTrue(user.is_active)
 if __name__ == "__main__":
     unittest.main()
+def test_inactive_user_stays_inactive(self):
+    with tempfile.TemporaryDirectory() as folder:
+        path = str(Path(folder) / "users.txt")
+
+        with patch(
+            "src.admin.user_manager.USERS_FILE",
+            path
+        ):
+            user = User(
+                "سارا",
+                "sara",
+                "Sara@123",
+                "sara@test.com",
+                "member",
+                False
+            )
+
+            save_user([user])
+            loaded_user = load_user()[0]
+
+            self.assertIs(
+                loaded_user.is_active,
+                False
+            )
