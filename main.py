@@ -5,8 +5,10 @@ from src.admin.admin_panel import admin_panel
 from src.admin.hall_manager import HallManager
 from src.coach.coach_panel import CoachPanel
 from src.member.member_panel import MemberPanel
+from src.admin.class_manager import ClassManager
 def main():
     hall_manager = HallManager()
+    class_manager = ClassManager(hall_manager)
     while True :
         print( "1.ورود مدیر باشگاه")
         print("2.ورود مربی")
@@ -28,7 +30,7 @@ def main():
             result = login("manager",users)
             if result is not None and result["success"]:
                 print("welcome manager")
-                admin_panel(result["username"], hall_manager)
+                admin_panel(result["username"], hall_manager, class_manager)
         elif choice == "2" :
             result = login("coach",users)
             if result is not None and result["success"]:

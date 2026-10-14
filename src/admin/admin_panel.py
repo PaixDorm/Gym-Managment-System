@@ -7,7 +7,8 @@ from src.admin.user_manager import (
 from getpass import getpass
 from src.utils.helpers import get_valid_choice,get_non_empty_input,confirm_action
 from src.admin.hall_panel import hall_panel
-def admin_panel(username,hall_manager):
+from src.admin.class_panel import class_panel
+def admin_panel(username, hall_manager, class_manager):
     while True :
         print("1.افزودن")
         print("2.نمایش")
@@ -15,7 +16,8 @@ def admin_panel(username,hall_manager):
         print("4.فعال/غیر فعال کردن")
         print("5.خروج")
         print("6.مدیریت سالن‌ها")
-        choice = get_valid_choice("عدد مورد نظر را وارد کنید : ",["1","2","3","4","5","6"])
+        print("7.مدیریت کلاس‌ها")
+        choice = get_valid_choice("عدد مورد نظر را وارد کنید : ",["1","2","3","4","5","6","7"])
         if choice == "1":
             name = get_non_empty_input("نام و نام خانوادگی: ")
             new_username = get_non_empty_input("نام کاربری: ")
@@ -84,3 +86,5 @@ def admin_panel(username,hall_manager):
             break
         elif choice == "6":
             hall_panel(hall_manager)
+        elif choice == "7":
+            class_panel(class_manager)

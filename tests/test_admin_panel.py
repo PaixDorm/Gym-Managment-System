@@ -9,8 +9,20 @@ class TestAdminPanel(unittest.TestCase):
     @patch("src.admin.admin_panel.get_valid_choice", side_effect=["6", "5"])
     def test_hall_menu(self, mock_choice, mock_hall_panel):
         manager = Mock()
-        admin_panel("admin_test", manager)
+        admin_panel("admin_test", manager, Mock())
         mock_hall_panel.assert_called_once_with(manager)
+    @patch("src.admin.admin_panel.class_panel")
+    @patch(
+        "src.admin.admin_panel.get_valid_choice",
+        side_effect=["7", "5"]
+    )
+    def test_class_menu(self, mock_choice, mock_class_panel):
+        hall_manager = Mock()
+        class_manager = Mock()
+
+        admin_panel("admin_test", hall_manager, class_manager)
+
+        mock_class_panel.assert_called_once_with(class_manager)
 
 
 if __name__ == "__main__":
