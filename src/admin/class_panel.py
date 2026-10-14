@@ -14,7 +14,7 @@ def class_panel(class_manager):
         print("5. ویرایش کلاس")
 
         choice = get_valid_choice(
-            "انتخاب: ", ["1", "2", "3", "4"]
+            "انتخاب: ", ["1", "2", "3", "4" , "5"]
         )
         if choice == "1":
             try:

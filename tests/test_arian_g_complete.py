@@ -229,7 +229,6 @@ def test_profile_handles_inactive_state_without_subscription(monkeypatch, capsys
     mod.MemberPanel("sara").my_profile_and_subscription_status()
     assert "بدون اشتراک" in capsys.readouterr().out
 
-
 def test_profile_with_active_subscription(monkeypatch, capsys):
     mod = member_module(monkeypatch)
     monkeypatch.setattr(mod, "find_username", lambda _: SimpleNamespace(
@@ -242,8 +241,6 @@ def test_profile_with_active_subscription(monkeypatch, capsys):
     monkeypatch.setattr(mod, "get_days_left", lambda _: 14)
     mod.MemberPanel("sara").my_profile_and_subscription_status()
     assert "14" in capsys.readouterr().out
-
-
 def test_wallet_shows_balance_and_transactions(monkeypatch, capsys):
     mod = member_module(monkeypatch)
     monkeypatch.setattr(mod, "get_wallet", lambda _: SimpleNamespace(balance=150000))
@@ -255,8 +252,6 @@ def test_wallet_shows_balance_and_transactions(monkeypatch, capsys):
     panel.see_my_transactions()
     text = capsys.readouterr().out
     assert "150000" in text and "TX1" in text
-
-
 def test_wallet_charge_forwards_user_inputs(monkeypatch):
     mod = member_module(monkeypatch)
     charge = Mock()
@@ -267,8 +262,6 @@ def test_wallet_charge_forwards_user_inputs(monkeypatch):
     charge.assert_called_once_with(
         "sara", "1234567890123456", "12", "2027", "123456", "123", "50000"
     )
-
-
 def test_subscription_purchase_calls_financial_module(monkeypatch):
     mod = member_module(monkeypatch)
     buy = Mock()
@@ -285,8 +278,6 @@ def test_subscription_purchase_calls_financial_module(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "3")
     mod.MemberPanel("sara").buy_or_renewal_my_subscription()
     buy.assert_called_once_with("sara", 3)
-
-
 def test_reports_count_only_active_enrollments(isolated_data, monkeypatch):
     from src.member import subscription_manager
     if not hasattr(subscription_manager, "get_revenue_by_type"):

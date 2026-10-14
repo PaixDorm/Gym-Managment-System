@@ -118,7 +118,7 @@ class CoachPanel:
         self.edit_workout(class_id, member)
 
     def edit_workout(self, class_id, member):
-        current = self.workouts.get_exercises(class_id, member)
+        current = self.workouts.get_exercises(class_id, member, self.coach)
 
         if current:
             print("\nبرنامۀ فعلی:")
