@@ -6,10 +6,11 @@ def hall_panel(hall_manager):
         print("2.نمایش سالن‌ها")
         print("3.فعال/غیر فعال کردن")
         print("4.بازگشت")
+        print("5. ویرایش سالن")
 
         choice = get_valid_choice(
             "انتخاب کنید: ",
-            ["1", "2", "3" ,"4"]
+            ["1", "2", "3" ,"4","5"]
         )
         if choice == "1":
             try:
@@ -56,3 +57,30 @@ def hall_panel(hall_manager):
 
         elif choice == "4":
             break
+        elif choice == "5":
+            try:
+                hall_id = int(input("شناسه سالن: "))
+                hall = hall_manager.view_halls().get(hall_id)
+
+                if hall is None:
+                    print("سالن پیدا نشد")
+                    continue
+
+                name = get_non_empty_input("نام جدید سالن: ")
+                capacity = int(input("ظرفیت جدید: "))
+
+                equipment = [
+                    item.strip()
+                    for item in input("تجهیزات جدید (با کاما جدا کنید): ").split(",")
+                    if item.strip()
+                ]
+
+                updated_hall = Hall(
+                    name, capacity, equipment, hall.status
+                )
+
+                hall_manager.edit_hall(hall_id, updated_hall)
+                print("سالن با موفقیت ویرایش شد")
+
+            except (ValueError, OSError) as error:
+                print("خطا در ویرایش سالن:", error)
