@@ -12,7 +12,7 @@ def validate_password(password):
 def validate_email(email):
     if not isinstance(email,str) or not email:
         return False
-    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
     return re.fullmatch(pattern,email) is not None
 def validate_username(username):
     if not isinstance(username,str) or not username:
@@ -22,7 +22,14 @@ def validate_username(username):
 def validate_name(name):
     if not isinstance(name,str) or not name:
         return False
-    pattern = r"^[a-zA-Zآ-ی\s]{3,}$"
+    name = name.strip()
+    pattern = r"^[a-zA-Z\u0600-\u06FF\s]{3,}$"
+    if len(name) < 3:
+        return False
     return re.fullmatch(pattern,name) is not None
+def validate_no_forbidden_chars(value):
+    if not isinstance(value,str):
+        return False
+    return "\t" not in value and "\n" not in value
 
         

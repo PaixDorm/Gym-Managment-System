@@ -8,7 +8,7 @@ def load_user():
     users = []
     with open(USERS_FILE,"r",encoding="utf-8") as f:
         for line in f:
-            line = line.strip()
+            line = line.rstrip('\n')
             if not line:
                 continue
             parts = line.split("\t")
@@ -20,19 +20,20 @@ def load_user():
             elif is_active_str == "False":
                 is_active = False
             else:
-                raise ValueError("مقدار نامعتبر")
+                raise ValueError("وضعیت کاربر نامعتبر است")
             user = User(name=name,username=username,password=password,email=email,role=role,is_active=is_active)
             users.append(user)
     return users
 def save_user(users):
     os.makedirs("data",exist_ok=True)
-    def clean(v):
-        return str(v).replace("\t"," ").replace("\n"," ")
     tmp_file = USERS_FILE + ".tmp"
     with open(tmp_file,"w",encoding="utf-8") as f:
         for user in users:
-            line = f"{clean(user.name)}\t{clean(user.username)}\t{clean(user.password)}\t{clean(user.email)}\t{clean(user.role)}\t{str(user.is_active)}"
-            f.write(line + "\n")
+            fields = [user.name,user.username,user.password,user.email,user.role]
+            if any("\t" in str(f) or "\n" in str(f) for f in fields):
+                raise ValueError("کاراکتر غیر مجاز")
+            line = f"{user.name}\t{user.username}\t{user.password}\t{user.email}\t{user.role}\t{str(user.is_active)}\n"
+            f.write(line)
     os.replace(tmp_file,USERS_FILE)
 def find_username(username):
     users = load_user()
@@ -40,7 +41,7 @@ def find_username(username):
         if user.username == username:
             return user
     return None
-def add_user(name,username,password,email,role):
+def add_user(name,username,password,email,role,is_active=True):
     if not validate_name(name):
         print("نام نامعتبر")
         return False
@@ -56,17 +57,22 @@ def add_user(name,username,password,email,role):
     if role not in ["coach" , "member"]:
         print("نقش نامعتبر")
         return False
-    if find_username(username) is not None:
-        print("نام کاربری تکراری")
-        return False
-    new_user = User(name=name,username=username,password=password,email=email,role=role,is_active=True)
     try:
         users = load_user()
     except ValueError as e:
-        print(f"خطا در فایل کاربران:{e}")
+        print(f"خطا در خواندن فایل کاربران:{e}")
         return False
+    for user in users:
+        if user.username == username:
+            print("نام کاربری تکراری")
+            return False
+    new_user = User(name=name,username=username,password=password,email=email,role=role,is_active=is_active)
     users.append(new_user)
-    save_user(users)
+    try:
+        save_user(users)
+    except Exception as e:
+        print(f"خطا در ذخیره سازی کاربر:{e}")
+        return False
     print("کاربر با موفقیت اضافه شد")
     return True
 def edit_user(username,new_name=None,new_password=None,new_email=None,new_is_active=None):
@@ -103,8 +109,12 @@ def edit_user(username,new_name=None,new_password=None,new_email=None,new_is_act
             print("مقدار وضعیت نامعتبر")
             return False
         target.is_active = new_is_active
-    save_user(users)
-    print("نام کاربری ویرایش شد")
+    try:
+        save_user(users)
+    except Exception as e:
+        print(f"خطا در ذخیره سازی:{e}")
+        return False
+    print("کاربر ویرایش شد")
     return True
 def toggle_active(username):
     try:
@@ -121,7 +131,12 @@ def toggle_active(username):
         print("نام کاربری پیدا نشد")
         return False
     target.is_active = not target.is_active
-    save_user(users)
+    try:
+        save_user(users)
+    except Exception as e:
+        print(f"خطا در ذخیره سازی وضعیت:{e}")
+        target.is_active = not target.is_active
+        return False
     if target.is_active:
         print("وضعیت به فعال تغییر کرد")
     else:
