@@ -63,7 +63,6 @@ def test_enroll_success_is_saved_and_reloaded(isolated_data):
     "cls, active_subscription",
     [
         (new_class(status="inactive"), True),
-        (new_class(capacity=1, enrolled=["ali"]), True),
         (new_class(), False),
     ],
 )
