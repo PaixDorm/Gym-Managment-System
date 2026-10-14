@@ -51,6 +51,37 @@ class TestAdminPanel(unittest.TestCase):
             mock_class_panel.assert_called_once_with(
                 class_manager
             )
+    def test_statistics_report(self):
+        from types import SimpleNamespace
+
+        users = [
+            SimpleNamespace(role="member", is_active=True),
+            SimpleNamespace(role="member", is_active=False),
+            SimpleNamespace(role="coach", is_active=True)
+        ]
+
+        class_manager = Mock()
+        class_manager.view_classes.return_value = {
+            1: SimpleNamespace(status=True),
+            2: SimpleNamespace(status=False)
+        }
+
+        with (
+            patch(
+                "src.admin.admin_panel.get_valid_choice",
+                side_effect=["9", "5"]
+            ),
+            patch(
+                "src.admin.admin_panel.load_user",
+                return_value=users
+            ),
+            patch("builtins.print") as mock_print
+        ):
+            admin_panel("manager_test", Mock(), class_manager)
+
+            mock_print.assert_any_call("اعضای فعال:", 1)
+            mock_print.assert_any_call("مربیان فعال:", 1)
+            mock_print.assert_any_call("کلاس‌های فعال:", 1)
 
     def test_revenue_report(self):
         with (
