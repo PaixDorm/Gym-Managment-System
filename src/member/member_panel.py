@@ -102,7 +102,7 @@ class MemberPanel:
         if user_subscription_state == "none":
             print("بدون اشتراک")
         else:
-            print(f"نوع اشتراک کاربر:")
+            print(f"نوع اشتراک کاربر: {user_subscription.months} ماهه")
             print(f"تاریخ شروع اشتراک کاربر: {user_subscription.start_date}")
             print(f"تاریخ پایان اشتراک کاربر: {user_subscription.end_date}")
             if user_subscription_state == "active":
