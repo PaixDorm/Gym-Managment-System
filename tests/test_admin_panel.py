@@ -91,9 +91,9 @@ class TestAdminPanel(unittest.TestCase):
         ):
             admin_panel("manager_test", Mock(), class_manager)
 
-            mock_print.assert_any_call("اعضای فعال:", 1)
-            mock_print.assert_any_call("مربیان فعال:", 1)
-            mock_print.assert_any_call("کلاس‌های فعال:", 1)
+            mock_print.assert_any_call("Active members:", 1)
+            mock_print.assert_any_call("Active coaches:", 1)
+            mock_print.assert_any_call("Active classes:", 1)
 
     def test_revenue_report(self):
         with (

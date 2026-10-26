@@ -13,14 +13,14 @@ def load_user():
                 continue
             parts = line.split("\t")
             if len(parts) != 6:
-                raise ValueError("سطر خراب در فایل")
+                raise ValueError("Invalid record format in users file.")
             name , username,password,email,role,is_active_str = parts
             if is_active_str == "True":
                 is_active = True
             elif is_active_str == "False":
                 is_active = False
             else:
-                raise ValueError("وضعیت کاربر نامعتبر است")
+                raise ValueError("Invalid user status.")
             user = User(name=name,username=username,password=password,email=email,role=role,is_active=is_active)
             users.append(user)
     return users
@@ -31,7 +31,7 @@ def save_user(users):
         for user in users:
             fields = [user.name,user.username,user.password,user.email,user.role]
             if any("\t" in str(f) or "\n" in str(f) for f in fields):
-                raise ValueError("کاراکتر غیر مجاز")
+                raise ValueError("Invalid character in user data.")
             line = f"{user.name}\t{user.username}\t{user.password}\t{user.email}\t{user.role}\t{str(user.is_active)}\n"
             f.write(line)
     os.replace(tmp_file,USERS_FILE)
@@ -43,43 +43,43 @@ def find_username(username):
     return None
 def add_user(name,username,password,email,role,is_active=True):
     if not validate_name(name):
-        print("نام نامعتبر")
+        print("Invalid name.")
         return False
     if not validate_username(username):
-        print("نام کاربری نامعتبر")
+        print("Invalid username.")
         return False
     if not validate_password(password):
-        print("پسورد نامعتبر")
+        print("Invalid password.")
         return False
     if not validate_email(email):
-        print("ایمیل نامعتبر")
+        print("Invalid email address.")
         return False
     if role not in ["coach" , "member"]:
-        print("نقش نامعتبر")
+        print("Invalid user role.")
         return False
     try:
         users = load_user()
     except ValueError as e:
-        print(f"خطا در خواندن فایل کاربران:{e}")
+        print(f"Error reading users file: {e}")
         return False
     for user in users:
         if user.username == username:
-            print("نام کاربری تکراری")
+            print("Duplicate username.")
             return False
     new_user = User(name=name,username=username,password=password,email=email,role=role,is_active=is_active)
     users.append(new_user)
     try:
         save_user(users)
     except Exception as e:
-        print(f"خطا در ذخیره سازی کاربر:{e}")
+        print(f"Error saving user: {e}")
         return False
-    print("کاربر با موفقیت اضافه شد")
+    print("User added successfully.")
     return True
 def edit_user(username,new_name=None,new_password=None,new_email=None,new_is_active=None):
     try:
         users = load_user()
     except ValueError as e:
-        print(f"خطا در فایل کاربران:{e}")
+        print(f"Error reading users file: {e}")
         return False
     target = None
     for user in users:
@@ -87,40 +87,40 @@ def edit_user(username,new_name=None,new_password=None,new_email=None,new_is_act
             target = user
             break
     if target is None:
-        print("نام کاربری پیدا نشد")
+        print("Username not found.")
         return False
     if new_name is not None:
         if not validate_name(new_name):
-            print("نام جدید نامعتبر")
+            print("Invalid new name.")
             return False
         target.name = new_name
     if new_password is not None:
         if not validate_password(new_password):
-            print("پسورد جدید نامعتبر")
+            print("Invalid new password.")
             return False
         target.password = new_password
     if new_email is not None:
         if not validate_email(new_email):
-            print("ایمیل جدید نامعتبر")
+            print("Invalid new email address.")
             return False
         target.email = new_email
     if new_is_active is not None:
         if not isinstance(new_is_active, bool):
-            print("مقدار وضعیت نامعتبر")
+            print("Invalid user status.")
             return False
         target.is_active = new_is_active
     try:
         save_user(users)
     except Exception as e:
-        print(f"خطا در ذخیره سازی:{e}")
+        print(f"Error saving user: {e}")
         return False
-    print("کاربر ویرایش شد")
+    print("User updated successfully.")
     return True
 def toggle_active(username):
     try:
         users = load_user()
     except ValueError as e:
-        print(f"خطا در فایل کاربران:{e}")
+        print(f"Error reading users file: {e}")
         return False
     target = None
     for user in users:
@@ -128,44 +128,44 @@ def toggle_active(username):
             target = user
             break
     if target is None:
-        print("نام کاربری پیدا نشد")
+        print("Username not found.")
         return False
     target.is_active = not target.is_active
     try:
         save_user(users)
     except Exception as e:
-        print(f"خطا در ذخیره سازی وضعیت:{e}")
+        print(f"Error saving user status: {e}")
         target.is_active = not target.is_active
         return False
     if target.is_active:
-        print("وضعیت به فعال تغییر کرد")
+        print("User account activated successfully.")
     else:
-        print("وضعیت به غیر فعال تغییر کرد")
+        print("User account deactivated successfully.")
     return True
 def view_user():
     try:
         users = load_user()
     except ValueError as e:
-        print(f"خطا در فایل کاربران:{e}")
-        return 
+        print(f"Error reading users file: {e}")
+        return
     if not users:
-        print("کاربری ثبت نشده")
+        print("No users found.")
         return
     for user in users:
         if user.is_active:
-            status = "فعال"
+            status = "Active"
         else:
-            status = "غیر فعال"
+            status = "Inactive"
         print(f"{user.name}|{user.username}|{user.role}|{user.email}|{status}")
-    print(f"تعداد کاربران : {len(users)}")
+    print(f"Total users: {len(users)}")
 def save_user_report():
     try:
         users = load_user()
     except ValueError as e:
-        print(f"خطا در فایل کاربران:{e}")
+        print(f"Error reading users file: {e}")
         return False
     if not users:
-        print("کاربری وجود ندارد")
+        print("No users found.")
         return False
     coaches = []
     members = []
@@ -177,17 +177,17 @@ def save_user_report():
     os.makedirs("data",exist_ok=True)
     report_file = "data/user.txt"
     with open(report_file,"w",encoding="utf-8") as f:
-        f.write("گزارش کاربران:\n")
-        f.write("مربیان:\n")
+        f.write("User Report:\n")
+        f.write("Coaches:\n")
         for user in coaches:
             f.write(f"{user.name}/{user.username}\n")
-        f.write("اعضا:\n")
+        f.write("Members:\n")
         for user in members:
             f.write(f"{user.name}/{user.username}\n")
-        f.write(f"تعدادکاربران : {len(users)}\n")
-        f.write(f"تعداد مربیان : {len(coaches)}\n")
-        f.write(f"تعداد اعضا : {len(members)}\n")
-    print("گزارش ذخیره شد")
+        f.write(f"Total users: {len(users)}\n")
+        f.write(f"Total coaches: {len(coaches)}\n")
+        f.write(f"Total members: {len(members)}\n")
+    print("User report saved successfully.")
     return True
 
     

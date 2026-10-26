@@ -10,21 +10,21 @@ def main():
     hall_manager = HallManager()
     class_manager = ClassManager(hall_manager)
     while True :
-        print( "1.ورود مدیر باشگاه")
-        print("2.ورود مربی")
-        print("3.ورود عضو باشگاه")
-        print("4.خروج")
+        print("1. Manager Login")
+        print("2. Coach Login")
+        print("3. Member Login")
+        print("4. Exit")
         choice = get_valid_choice(
             "Enter your choice: ",
             ["1", "2", "3", "4"]
         )
         if choice == "4":
-            print("موفق باشید")
+            print("Thank you for using the Gym Management System. Goodbye!")
             break
         try:
             users = [user.to_dict() for user in load_user()]
         except (OSError, ValueError, UnicodeError) as error:
-            print("خطا در خواندن کاربران:", error)
+            print("Error loading users:", error)
             continue
         if choice == "1" :
             result = login("manager",users)
