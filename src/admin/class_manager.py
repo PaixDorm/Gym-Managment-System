@@ -37,7 +37,7 @@ class ClassManager:
                 or fields[8] not in ("active", "inactive")
             ):
                 raise ValueError(
-                    "فرمت اطلاعات کلاس نامعتبر است"
+                    "Invalid class data format."
                 )
 
             (
@@ -96,16 +96,16 @@ class ClassManager:
     def add_class(self, class_id, gym_class):
         if not isinstance(gym_class, GymClass):
             raise ValueError(
-                "ورودی باید یک GymClass باشد"
+                "Input must be a GymClass instance."
             )
 
         if type(class_id) is not int or class_id <= 0:
             raise ValueError(
-                "شناسه کلاس باید عدد مثبت باشد"
+                "Class ID must be a positive integer."
             )
 
         if class_id in self.classes:
-            raise ValueError("شناسه تکراری است")
+            raise ValueError("This ID already exists.")
 
         self.validate_class_resources(gym_class)
 
@@ -117,14 +117,14 @@ class ClassManager:
 
     def deactivate_class(self, class_id):
         if class_id not in self.classes:
-            raise ValueError("کلاس پیدا نشد")
+            raise ValueError("Class not found.")
 
         self.classes[class_id].status = False
         self._save()
 
     def activate_class(self, class_id):
         if class_id not in self.classes:
-            raise ValueError("کلاس پیدا نشد")
+            raise ValueError("Class not found.")
 
         gym_class = self.classes[class_id]
 
@@ -135,11 +135,11 @@ class ClassManager:
 
     def edit_class(self, class_id, new_class):
         if class_id not in self.classes:
-            raise ValueError("کلاس پیدا نشد")
+            raise ValueError("Class not found.")
 
         if not isinstance(new_class, GymClass):
             raise ValueError(
-                "ورودی باید یک GymClass باشد"
+                "Input must be a GymClass instance."
             )
 
         self.validate_class_resources(new_class)
@@ -149,16 +149,16 @@ class ClassManager:
 
     def validate_class_resources(self, gym_class):
         if gym_class.hall not in self.hall_manager.halls:
-            raise ValueError("سالن پیدا نشد")
+            raise ValueError("Hall not found.")
 
         hall = self.hall_manager.halls[gym_class.hall]
 
         if not hall.status:
-            raise ValueError("سالن غیرفعال است")
+            raise ValueError("Hall is inactive.")
 
         if gym_class.capacity > hall.capacity:
             raise ValueError(
-                "ظرفیت کلاس از سالن بیشتر است"
+                "Class capacity exceeds hall capacity."
             )
 
         coach = find_username(gym_class.coach)
@@ -169,5 +169,5 @@ class ClassManager:
             or not coach.is_active
         ):
             raise ValueError(
-                "مربی معتبر و فعال نیست"
+                "Coach must be valid and active."
             )

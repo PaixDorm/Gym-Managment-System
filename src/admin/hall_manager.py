@@ -32,7 +32,7 @@ class HallManager:
                 or fields[4] not in ("active", "inactive")
             ):
                 raise ValueError(
-                    "فرمت اطلاعات سالن نامعتبر است"
+                    "Invalid hall data format."
                 )
 
             hall_id, name, capacity, equipment, status = fields
@@ -76,13 +76,13 @@ class HallManager:
 
     def add_hall(self, hall_id, hall):
         if not isinstance(hall, Hall):
-            raise ValueError("ورودی باید یک Hall باشد")
+            raise ValueError("Input must be a Hall instance.")
 
         if type(hall_id) is not int or hall_id <= 0:
-            raise ValueError("شناسه سالن باید عدد مثبت باشد")
+            raise ValueError("Hall ID must be a positive integer.")
 
         if hall_id in self.halls:
-            raise ValueError("شناسه تکراری است")
+            raise ValueError("This ID already exists.")
 
         self.halls[hall_id] = hall
         self._save()
@@ -92,24 +92,24 @@ class HallManager:
 
     def activate_hall(self, hall_id):
         if hall_id not in self.halls:
-            raise ValueError("سالن پیدا نشد")
+            raise ValueError("Hall not found.")
 
         self.halls[hall_id].status = True
         self._save()
 
     def deactivate_hall(self, hall_id):
         if hall_id not in self.halls:
-            raise ValueError("سالن پیدا نشد")
+            raise ValueError("Hall not found.")
 
         self.halls[hall_id].status = False
         self._save()
 
     def edit_hall(self, hall_id, new_hall):
         if hall_id not in self.halls:
-            raise ValueError("سالن پیدا نشد")
+            raise ValueError("Hall not found.")
 
         if not isinstance(new_hall, Hall):
-            raise ValueError("ورودی باید یک Hall باشد")
+            raise ValueError("Input must be a Hall instance.")
 
         self.halls[hall_id] = new_hall
         self._save()
