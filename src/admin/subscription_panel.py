@@ -16,14 +16,14 @@ from src.utils.helpers import (
 
 def subscription_panel():
     while True:
-        print("\n--- مدیریت اشتراک‌ها و پرداخت‌ها ---")
-        print("1. وضعیت اشتراک اعضا")
-        print("2. مشاهده پرداخت‌های اشتراک")
-        print("3. ثبت یا تمدید اشتراک برای عضو")
-        print("4. بازگشت")
+        print("\n--- Subscription and Payment Management ---")
+        print("1. View member subscription statuses")
+        print("2. View subscription payments")
+        print("3. Purchase or renew a member subscription")
+        print("4. Back")
 
         choice = get_valid_choice(
-            "انتخاب: ", ["1", "2", "3", "4"]
+            "Choose an option: ", ["1", "2", "3", "4"]
         )
 
         if choice == "4":
@@ -37,16 +37,16 @@ def subscription_panel():
                 ]
 
                 if not members:
-                    print("عضوی ثبت نشده است")
+                    print("No members have been registered.")
                     continue
 
                 usernames = [u.username for u in members]
                 statuses = get_members_status(usernames)
 
                 labels = {
-                    "active": "فعال",
-                    "expired": "منقضی‌شده",
-                    "none": "بدون اشتراک"
+                    "active": "Active",
+                    "expired": "Expired",
+                    "none": "No subscription"
                 }
 
                 for member in members:
@@ -60,7 +60,7 @@ def subscription_panel():
                 payments = get_payments_report()
 
                 if not payments:
-                    print("پرداخت اشتراکی ثبت نشده است")
+                    print("No subscription payments have been recorded.")
                     continue
 
                 names = {
@@ -70,17 +70,17 @@ def subscription_panel():
 
                 for item in payments:
                     print(
-                        f"عضو: {names.get(item['username'], item['username'])}"
-                        f" | اشتراک: {item['months']} ماهه"
-                        f" | مبلغ: {item['amount']} تومان"
-                        f" | تاریخ پرداخت: {item['payment_date']}"
-                        f" | شروع: {item['start_date']}"
-                        f" | پایان: {item['end_date']}"
-                        f" | پیگیری: {item['tracking_code']}"
+                        f"Member: {names.get(item['username'], item['username'])}"
+                        f" | Subscription: {item['months']} months"
+                        f" | Amount: {item['amount']} Toman"
+                        f" | Payment date: {item['payment_date']}"
+                        f" | Start: {item['start_date']}"
+                        f" | End: {item['end_date']}"
+                        f" | Tracking code: {item['tracking_code']}"
                     )
 
             elif choice == "3":
-                username = get_non_empty_input("نام کاربری عضو: ")
+                username = get_non_empty_input("Member username: ")
                 user = find_username(username)
 
                 if (
@@ -88,37 +88,37 @@ def subscription_panel():
                     or user.role != "member"
                     or not user.is_active
                 ):
-                    print("عضو معتبر و فعال پیدا نشد")
+                    print("No valid active member was found.")
                     continue
 
                 plans = get_plans()
 
                 for months, plan in sorted(plans.items()):
-                    print(f"{months} ماهه: {plan.price} تومان")
+                    print(f"{months} months: {plan.price} Toman")
 
                 months = int(get_valid_choice(
-                    "مدت اشتراک: ",
+                    "Subscription duration: ",
                     [str(m) for m in plans]
                 ))
 
                 price = plans[months].price
                 balance = get_wallet(username).balance
 
-                print(f"موجودی عضو: {balance} تومان")
-                print(f"مبلغ اشتراک: {price} تومان")
+                print(f"Member balance: {balance} Toman")
+                print(f"Subscription price: {price} Toman")
 
                 if not confirm_action(
-                    "مبلغ از کیف پول عضو کسر شود؟ (y/n): "
+                    "Deduct the amount from the member's wallet? (y/n): "
                 ):
-                    print("عملیات لغو شد")
+                    print("Operation cancelled.")
                     continue
 
                 sub = buy_subscription(username, months)
 
-                print("اشتراک ثبت شد")
-                print("تاریخ شروع:", sub.start_date)
-                print("تاریخ پایان:", sub.end_date)
-                print("شماره پیگیری:", sub.tracking_code)
+                print("Subscription recorded successfully.")
+                print("Start date:", sub.start_date)
+                print("End date:", sub.end_date)
+                print("Tracking code:", sub.tracking_code)
 
         except (
             ValueError,
@@ -127,4 +127,4 @@ def subscription_panel():
             StorageError,
             InsufficientBalanceError
         ) as error:
-            print("خطا در مدیریت اشتراک‌ها:", error)
+            print("Subscription management error:", error)

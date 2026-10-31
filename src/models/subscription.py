@@ -8,9 +8,9 @@ month_to_persian = {1: "یک‌ماهه", 3: "سه‌ماهه", 6: "شش‌ما�
 class SubscriptionPlan:
     def __init__(self, months, price):
         if not isinstance(months, int) or isinstance(months, bool) or months not in valid_months:
-            raise ValueError(f"مدت ماه اشتراک باید یکی از مقادیر مجاز {valid_months} باشد.")
+            raise ValueError(f"Subscription duration must be one of {valid_months} months.")
         if not isinstance(price, int) or isinstance(price, bool) or price <= 0:
-            raise ValueError("قیمت طرح اشتراک باید یک عدد صحیح و مثبت باشد.")
+            raise ValueError("Subscription plan price must be a positive integer.")
         self.months = months
         self.price = price
 
@@ -28,30 +28,30 @@ class SubscriptionPlan:
     @classmethod
     def from_dict(cls, data):
         if not isinstance(data, dict):
-            raise ValueError("داده ورودی باید از نوع دیکشنری باشد.")
+            raise ValueError("Input data must be a dictionary.")
         if "months" not in data or "price" not in data:
-            raise ValueError("دیکشنری ورودی باید دارای کلیدهای months و price باشد.")
+            raise ValueError("Input dictionary must contain months and price keys.")
         return cls(months=data["months"], price=data["price"])
 
 class Subscription:
     def __init__(self, username, months, amount, start_date, tracking_code, payment_date=None):
         if not isinstance(username, str) or not username.strip():
-            raise ValueError("نام کاربری باید یک رشته معتبر و غیرخالی باشد.")
+            raise ValueError("Username must be a non-empty string.")
         username = username.strip()
         if "|" in username or "\n" in username or "\r" in username:
-            raise ValueError("نام کاربری نمی‌تواند شامل جداکننده یا کاراکترهای کنترلی باشد.")
+            raise ValueError("Username cannot contain separators or control characters.")
         if not isinstance(months, int) or isinstance(months, bool) or months not in valid_months:
-            raise ValueError(f"مدت ماه اشتراک باید یکی از مقادیر مجاز {valid_months} باشد.")
+            raise ValueError(f"Subscription duration must be one of {valid_months} months.")
         if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
-            raise ValueError("مبلغ باید یک عدد صحیح و مثبت باشد.")
+            raise ValueError("Amount must be a positive integer.")
         if type(start_date) is not date:
-            raise ValueError("تاریخ شروع باید از نوع date باشد.")
+            raise ValueError("Start date must be a date object.")
         if payment_date is None:
             payment_date = date.today()
         elif type(payment_date) is not date:
-            raise ValueError("تاریخ پرداخت باید از نوع date باشد.")
+            raise ValueError("Payment date must be a date object.")
         if not isinstance(tracking_code, str) or not traking_number_regex.fullmatch(tracking_code):
-            raise ValueError("فرمت شماره پیگیری نامعتبر است.")
+            raise ValueError("Invalid tracking code format.")
 
         self.username = username
         self.months = months
@@ -68,14 +68,14 @@ class Subscription:
         if today is None:
             today = date.today()
         elif type(today) is not date:
-            raise ValueError("تاریخ امروز باید از نوع date باشد.")
+            raise ValueError("Today must be a date object.")
         return self.start_date <= today < self.end_date
 
     def days_left(self, today=None):
         if today is None:
             today = date.today()
         elif type(today) is not date:
-            raise ValueError("تاریخ امروز باید از نوع date باشد.")
+            raise ValueError("Today must be a date object.")
         if not self.is_active(today):
             return 0
         delta = self.end_date - today
@@ -102,7 +102,7 @@ class Subscription:
     def from_line(cls, line):
         """ساخت شیء اشتراک از روی یک خط متنی"""
         if not isinstance(line, str):
-            raise ValueError("خط ورودی باید از نوع رشته باشد.")
+            raise ValueError("Input line must be a string.")
         line = line.strip()
         parts = [part.strip() for part in line.split("|")]
         if len(parts) == 6:
@@ -113,7 +113,7 @@ class Subscription:
                 start_date_obj = date.fromisoformat(start_date_str)
                 payment_date_obj = date.fromisoformat(payment_date_str)
             except (ValueError, TypeError):
-                raise ValueError("مقادیر عددی یا تاریخ در خط ورودی اشتراک نامعتبر است.") from None
+                raise ValueError("Invalid numeric or date fields in subscription record.") from None
             return cls(
                 username=username,
                 months=months,
@@ -130,10 +130,10 @@ class Subscription:
                 end_date_obj = date.fromisoformat(end_date_str)
                 payment_date_obj = date.fromisoformat(payment_date_str)
             except (ValueError, TypeError):
-                raise ValueError("مقادیر عددی یا تاریخ در خط ورودی اشتراک نامعتبر است.") from None
+                raise ValueError("Invalid numeric or date fields in subscription record.") from None
             expected_end_date = start_date_obj + timedelta(days=months * days_per_month)
             if end_date_obj != expected_end_date:
-                raise ValueError("تاریخ پایان ثبت‌شده در فایل با مدت‌زمان اشتراک مغایرت دارد.")
+                raise ValueError("Stored end date does not match subscription duration.")
             return cls(
                 username=username,
                 months=months,
@@ -142,14 +142,14 @@ class Subscription:
                 tracking_code=tracking_code,
                 payment_date=payment_date_obj)
         else:
-            raise ValueError("تعداد اجزای خط اشتراک نامعتبر است؛ باید ۶ یا ۷ بخش باشد.")
+            raise ValueError("Invalid subscription record: expected 6 or 7 fields.")
 
 def next_start_date(latest_subscription, today=None):
     """محاسبه تاریخ شروع اشتراک جدید برای تمدید"""
     if today is None:
         today = date.today()
     elif type(today) is not date:
-        raise ValueError("تاریخ امروز باید از نوع date باشد.")
+        raise ValueError("Today must be a date object.")
     if latest_subscription is None:
         return today
     if latest_subscription.is_active(today) or latest_subscription.start_date > today:

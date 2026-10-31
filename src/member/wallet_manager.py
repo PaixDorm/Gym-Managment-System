@@ -15,55 +15,55 @@ amount_regex = re.compile(r"^[1-9][0-9]*$")
 def validate_card_number(card_input):
     """بررسی و اعتبارسنجی شماره کارت (دقیقاً ۱۶ رقم)"""
     if not isinstance(card_input, str):
-        raise ValueError("شماره کارت باید از نوع رشته باشد.")
+        raise ValueError("Card number must be a string.")
     card_str = card_input.strip()
     if not card_regex.fullmatch(card_str):
-        raise ValueError("شماره کارت باید دقیقاً ۱۶ رقم باشد.")
+        raise ValueError("Card number must contain exactly 16 digits.")
     return card_str
 
 def validate_exp_month(month_input):
     """بررسی و اعتبارسنجی ماه انقضا (بین ۱ تا ۱۲)"""
     if not isinstance(month_input, str):
-        raise ValueError("ماه انقضا باید از نوع رشته باشد.")
+        raise ValueError("Expiration month must be a string.")
     month_str = month_input.strip()
     if not month_regex.fullmatch(month_str):
-        raise ValueError("ماه انقضا باید عددی بین ۱ تا ۱۲ باشد.")
+        raise ValueError("Expiration month must be between 1 and 12.")
     return int(month_str)
 
 def validate_exp_year(year_input):
     """بررسی و اعتبارسنجی سال انقضا (چهار رقمی)"""
     if not isinstance(year_input, str):
-        raise ValueError("سال انقضا باید از نوع رشته باشد.")
+        raise ValueError("Expiration year must be a string.")
     year_str = year_input.strip()
     if not year_regex.fullmatch(year_str):
-        raise ValueError("سال انقضا باید یک عدد چهار رقمی معتبر باشد.")
+        raise ValueError("Expiration year must be a valid four-digit number.")
     return int(year_str)
 
 def validate_card_password(password_input):
     """بررسی و اعتبارسنجی رمز دوم (دقیقاً ۶ رقم با حفظ صفرهای اولیه)"""
     if not isinstance(password_input, str):
-        raise ValueError("رمز دوم باید از نوع رشته باشد.")
+        raise ValueError("Card payment password must be a string.")
     pass_str = password_input.strip()
     if not password_regex.fullmatch(pass_str):
-        raise ValueError("رمز دوم باید دقیقاً ۶ رقم باشد.")
+        raise ValueError("Card payment password must contain exactly 6 digits.")
     return pass_str
 
 def validate_cvv2(cvv2_input):
     """بررسی و اعتبارسنجی CVV2 (دقیقاً ۳ رقم)"""
     if not isinstance(cvv2_input, str):
-        raise ValueError("کد CVV2 باید از نوع رشته باشد.")
+        raise ValueError("CVV2 must be a string.")
     cvv2_str = cvv2_input.strip()
     if not cvv2_regex.fullmatch(cvv2_str):
-        raise ValueError("کد CVV2 باید دقیقاً ۳ رقم باشد.")
+        raise ValueError("CVV2 must contain exactly 3 digits.")
     return cvv2_str
 
 def validate_amount(amount_input):
     """بررسی و اعتبارسنجی مبلغ تراکنش"""
     if not isinstance(amount_input, str):
-        raise ValueError("مبلغ باید از نوع رشته باشد.")
+        raise ValueError("Amount must be a string.")
     amount_str = amount_input.strip()
     if not amount_regex.fullmatch(amount_str):
-        raise ValueError("مبلغ وارد شده معتبر نیست؛ باید یک عدد صحیح و مثبت باشد.")
+        raise ValueError("Amount must be a positive integer.")
     return int(amount_str)
 
 def validate_payment_inputs(card, month, year, password, cvv2, amount):
@@ -92,7 +92,7 @@ def _append_line(line):
         with open(transactions_file_path, "a", encoding="utf-8") as f:
             f.write(line + "\n")
     except OSError:
-        raise StorageError("خطا در ذخیره‌سازی اطلاعات روی دیسک.") from None
+        raise StorageError("Failed to save data to disk.") from None
 
 def _read_lines():
     """خواندن تمام خطوط فایل؛ در صورت عدم وجود فایل، لیست خالی برمی‌گرداند"""
@@ -102,7 +102,7 @@ def _read_lines():
         with open(transactions_file_path, "r", encoding="utf-8") as f:
             return f.readlines()
     except OSError:
-        raise StorageError("خطا در خواندن فایل از روی دیسک.") from None
+        raise StorageError("Failed to read data from disk.") from None
 
 def _load_transactions(strict=False):
     """بارگذاری تمام تراکنش‌های فایل با قابلیت سخت‌گیری در برابر خطوط خراب"""
@@ -117,7 +117,7 @@ def _load_transactions(strict=False):
             transactions.append(tx)
         except ValueError:
             if strict:
-                raise StorageError(f"خطای داده‌های ذخیره‌شده در شماره خط {idx}: فرمت خط نامعتبر است.") from None
+                raise StorageError(f"Invalid stored transaction data on line {idx}: invalid record format.") from None
             continue
     return transactions
 
@@ -128,7 +128,7 @@ def get_all_transactions(strict=False):
 def get_balance(username):
     """محاسبه موجودی فعلی کاربر از روی تاریخچه تراکنش‌ها (شارژ مثبت، اشتراک منفی)"""
     if not isinstance(username, str) or not username.strip():
-        raise ValueError("نام کاربری نامعتبر است.")
+        raise ValueError("Invalid username.")
     username = username.strip()
     all_transactions = _load_transactions(strict=True)
     balance = 0
@@ -139,13 +139,13 @@ def get_balance(username):
             elif tx.transaction_type == "subscription":
                 balance -= tx.amount
     if balance < 0:
-        raise StorageError("موجودی حساب منفی است که نشان‌دهنده ناسازگاری در داده‌های ذخیره‌شده است.")
+        raise StorageError("Negative wallet balance indicates inconsistent stored transaction data.")
     return balance
 
 def get_wallet(username):
     """دریافت شیء کیف پول حاوی موجودی به‌دست‌آمده از تراکنش‌ها"""
     if not isinstance(username, str) or not username.strip():
-        raise ValueError("نام کاربری نامعتبر است.")
+        raise ValueError("Invalid username.")
     username = username.strip()
     current_balance = get_balance(username)
     return Wallet(username, balance=current_balance)
@@ -153,7 +153,7 @@ def get_wallet(username):
 def get_transactions(username):
     """دریافت لیست تراکنش‌های متعلق به کاربر بدون حساسیت به خطوط مخدوش احتمالی دیگر"""
     if not isinstance(username, str) or not username.strip():
-        raise ValueError("نام کاربری نامعتبر است.")
+        raise ValueError("Invalid username.")
     username = username.strip()
     all_transactions = _load_transactions(strict=False)
     return [tx for tx in all_transactions if tx.username == username]
@@ -161,7 +161,7 @@ def get_transactions(username):
 def record_transaction(transaction):
     """بررسی نوع تراکنش و افزودن آن به فایل با جلوگیری از ثبت تکراری"""
     if not isinstance(transaction, Transaction):
-        raise ValueError("ورودی باید از نوع شیء Transaction باشد.")
+        raise ValueError("Input must be a Transaction instance.")
     existing_transactions = _load_transactions(strict=False)
     if any(tx.tracking_code == transaction.tracking_code for tx in existing_transactions):
         return
@@ -171,7 +171,7 @@ def _mask_receipt(card, payment_id):
     """رسید ماسک‌شده: ۴ رقم اول کارت، ۸ ستاره، ۴ رقم آخر، سپس بقیه‌ی شناسه (مبلغ و عدد تصادفی)"""
     if not (isinstance(card, str) and isinstance(payment_id, str)
             and len(card) == 16 and payment_id.startswith(card) and len(payment_id) > 16):
-        raise ValueError("رسید بانکی قابل ماسک‌ شدن نیست.")
+        raise ValueError("Bank receipt cannot be masked.")
     return card[:4] + "*" * 8 + card[-4:] + payment_id[16:]
 
 def new_transaction(username, transaction_type, amount, description, when=None):
@@ -182,7 +182,7 @@ def new_transaction(username, transaction_type, amount, description, when=None):
         if code not in existing_codes:
             return Transaction(username=username, transaction_type=transaction_type, amount=amount,
                                description=description, date=when, tracking_code=code)
-    raise StorageError("ساخت شماره پیگیری یکتا ممکن نشد.")
+    raise StorageError("Could not generate a unique tracking code.")
 
 def charge_wallet(username, card, month, year, password, cvv2, amount):
     """شارژ کیف پول با اعتبارسنجی ورودی، تراکنش بانکی و ثبت در فایل"""
@@ -191,9 +191,9 @@ def charge_wallet(username, card, month, year, password, cvv2, amount):
     try:
         payment_result = API().pay(valid_card, valid_month, valid_year, valid_pass, valid_cvv2, valid_amount)
     except ValueError:
-        raise ValueError("اطلاعات کارت توسط بانک تأیید نشد.") from None
+        raise ValueError("Bank rejected the card details.") from None
     if not payment_result:
-        raise ValueError("تراکنش بانکی ناموفق بود.")
+        raise ValueError("Bank transaction failed.")
     try:
         transaction.attach_receipt(_mask_receipt(valid_card, payment_result))
     except ValueError:
@@ -205,5 +205,5 @@ def charge_wallet(username, card, month, year, password, cvv2, amount):
         except StorageError:
             if attempt == 1:
                 reference = transaction.receipt or transaction.tracking_code
-                raise StorageError(f"پرداخت انجام شد ولی ثبت نشد. دوباره پرداخت نکنید و این رسید را به مدیر اعلام کنید: {reference}") from None
+                raise StorageError(f"Payment succeeded but could not be recorded. Do not pay again; give this receipt to the manager: {reference}") from None
     return transaction
