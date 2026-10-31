@@ -15,24 +15,24 @@ def authenticate_user(username, password, role, users):
             else :
                 return {"success": False,"username": None,"role":None}
     return {"success": False, "username": None, "role": None}
-def login(role,users):
+def login(role, users):
     while True:
-        username = input("یوزرنیم خود را وارد کنید : ")
-        password = input("پسوورد خود را وارد کنید : ")
+        username = input("Enter your username: ")
+        password = input("Enter your password: ")
         result = authenticate_user(username, password, role, users)
         if result["success"]:
             print("Login Successful")
             return result
-        else :
+        else:
             print("Login Failed")
             while True:
-                print("عدد مورد نظر را وارد کنید")
-                print("1,برای تلاش مجدد")
-                print("2.بازگشت به منوی قبلی")
-                choice = input()
+                print("Please choose an option:")
+                print("1. Try Again")
+                print("2. Back to Previous Menu")
+                choice = input("Enter your choice: ")
                 if choice == "1":
                     break
                 elif choice == "2":
                     return None
-                else :
-                    print("عدد نامعنبر مجدد تلاش کنید")
+                else:
+                    print("Invalid choice. Please try again.")

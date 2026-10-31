@@ -1,171 +1,285 @@
 # Gym Management System
 
-**سامانه مدیریت باشگاه ورزشی**  
-پروژه پایانی مینی‌کمپ پایتون آلفا، دوره **QBC13 کوئرا**
+A Python-based Command-Line Interface (CLI) application for managing gym operations, users, classes, memberships, and payments.
 
-## درباره پروژه
+**Final Project — Python Alpha Mini-Bootcamp (QBC13)**
 
-این پروژه یک برنامه خط فرمان (CLI) با زبان **Python** برای مدیریت اطلاعات و فعالیت‌های یک باشگاه ورزشی است. سامانه سه نقش **مدیر، مربی و عضو** دارد و امکانات هر نقش از طریق منوی مخصوص او در دسترس است.
+## Overview
 
-داده‌ها در فایل‌های متنی نگهداری می‌شوند و پروژه برای تمرین برنامه‌نویسی شیءگرا، کار با فایل، اعتبارسنجی، مدیریت استثنا، دکوراتور، ژنراتور، تست و همکاری تیمی با Git/GitHub ساخته شده است.
+Gym Management System is an educational Python application designed to manage the daily operations of a fitness center.
 
-## امکانات
+The system supports three user roles:
 
-### مدیر باشگاه (Manager)
+- **Manager:** Manages users, halls, classes, subscriptions, and reports.
+- **Coach:** Manages assigned classes and members' workout plans.
+- **Member:** Manages subscriptions, wallet balance, class enrollment, and workout information.
 
-- افزودن عضو و مربی، نمایش کاربران، ویرایش اطلاعات و فعال/غیرفعال کردن حساب‌ها
-- ایجاد، نمایش، ویرایش و فعال/غیرفعال کردن سالن‌ها و ثبت ظرفیت و تجهیزات آن‌ها
-- ایجاد، نمایش، ویرایش و فعال/غیرفعال کردن کلاس‌های ورزشی
-- بررسی معتبر بودن مربی و سالن و کنترل ظرفیت کلاس هنگام ایجاد یا فعال‌سازی
-- مشاهده تعداد اعضا، مربیان و کلاس‌های فعال
-- مشاهده گزارش درآمد اشتراک‌ها
-- مشاهده وضعیت اشتراک اعضا و پرداخت‌های اشتراک
-- ثبت یا تمدید اشتراک برای عضو با **کسر هزینه از کیف پول همان عضو** و پس از تأیید مدیر
+The project demonstrates object-oriented programming, file handling, input validation, exception handling, decorators, generators, automated testing, and collaborative development with Git and GitHub.
 
-### مربی (Coach)
+Data is stored locally in UTF-8 text files.
 
-- مشاهده کلاس‌های مربوط به خود و اعضای ثبت‌نام‌شده
-- افزودن یا جایگزین‌کردن حرکات برنامه تمرینی اعضای کلاس خود
-- ثبت نام حرکت، ست، تکرار، زمان استراحت و توضیح اختیاری
+## Features
 
-### عضو (Member)
+### Manager Panel
 
-- مشاهده پروفایل و وضعیت اشتراک
-- مشاهده موجودی کیف پول و تراکنش‌ها
-- شارژ کیف پول از طریق واسط بانکی آموزشی پروژه
-- خرید یا تمدید اشتراک از کیف پول
-- مشاهده کلاس‌های فعال و ظرفیت باقی‌مانده، ثبت‌نام و لغو ثبت‌نام
-- مشاهده کلاس‌های ثبت‌نام‌شده و برنامه‌های تمرینی
+The manager can:
 
-### امکانات مشترک
+- Add, view, and edit coach and member accounts.
+- Activate or deactivate user accounts.
+- Create, view, edit, and manage gym halls.
+- Manage hall capacity and equipment.
+- Create, view, edit, and manage gym classes.
+- Validate coach and hall availability when managing classes.
+- Monitor class capacity.
+- View statistics for active members, coaches, and classes.
+- Generate subscription revenue reports.
+- View member subscription and payment information.
+- Register or renew member subscriptions using the member's wallet balance, with manager confirmation.
 
-- ورود با نام کاربری، رمز عبور و نقش و بررسی فعال‌بودن حساب
-- ثبت نتیجه تلاش‌های ورود در فایل فعالیت‌ها با استفاده از Decorator
-- ذخیره و بازیابی اطلاعات با فایل‌های متنی UTF-8
-- اعتبارسنجی داده‌ها و مدیریت خطا در بخش‌های مختلف
-- استفاده از Generator برای پیمایش داده‌های مرتبط
+### Coach Panel
 
-## پیش‌نیازها
+Coaches can:
 
-- **Python 3.12 یا جدیدتر**
-- Terminal یا محیطی مانند PyCharm
-- `pytest` برای اجرای تست‌ها؛ وابستگی‌ها در `requirements.txt` نوشته شده‌اند
+- View their assigned classes.
+- View members enrolled in their classes.
+- Create or update workout plans for their members.
+- Manage workout details, including exercise names, sets, repetitions, rest periods, and optional notes.
 
-کتابخانه‌های دیگر مورد استفاده در هسته پروژه عمدتاً از کتابخانه استاندارد Python هستند. فایل `Bank.py` واسط پرداخت **آموزشی/شبیه‌سازی‌شده** پروژه است و در ریشه مخزن قرار دارد؛ به سرویس پرداخت واقعی متصل نیست.
+### Member Panel
 
-## نصب و راه‌اندازی
+Members can:
 
-ابتدا پروژه را دریافت کنید و وارد پوشه اصلی شوید:
+- View their profile and subscription status.
+- Check wallet balance and transaction history.
+- Add funds through the project's simulated banking interface.
+- Purchase or renew subscriptions using their wallet balance.
+- View available classes and remaining capacity.
+- Enroll in or withdraw from classes.
+- View enrolled classes and assigned workout plans.
+
+### Shared Functionality
+
+- Role-based authentication.
+- Username and password validation.
+- Account activation checks.
+- Activity logging using a Python decorator.
+- File-based data persistence.
+- Input validation and exception handling.
+- Generator-based data processing.
+
+## Technologies
+
+- **Python 3.12+**
+- **Object-Oriented Programming (OOP)**
+- **Python Standard Library**
+- **pytest**
+- **Git & GitHub**
+- **Text-file storage**
+
+The application does not require a database server.
+
+## Getting Started
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/PaixDorm/Gym-Managment-System.git
 cd Gym-Managment-System
 ```
 
-نصب وابستگی‌های تست:
+Alternatively, download the repository as a ZIP file and extract it.
+
+### 2. Install Dependencies
+
+Make sure Python 3.12 or newer is installed.
+
+Install the dependencies listed in `requirements.txt`:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### ساخت اولین مدیر
+The main application primarily uses Python's standard library. The requirements file includes `pytest` for automated testing.
 
-فایل `data/users.txt` حاوی اطلاعات محلی کاربران است و به‌صورت پیش‌فرض در مخزن قرار نمی‌گیرد. **برای اولین اجرای پروژه**، از پوشه اصلی این دستور را اجرا کنید:
+### 3. Create the Initial Manager Account
+
+Before running the application for the first time, create a manager account:
 
 ```bash
 python setup_manager.py
 ```
 
-اطلاعات نام، نام کاربری، ایمیل و رمز عبور مدیر را وارد کنید. این برنامه پس از اعتبارسنجی، حساب مدیر را در `data/users.txt` ایجاد می‌کند. در صورت وجود مدیر قبلی، از ایجاد مدیر جدید جلوگیری می‌شود.
+Follow the prompts to provide:
 
-برای ساخت حساب‌های مربی و عضو، پس از ورود مدیر از گزینه «افزودن کاربر» استفاده کنید. در ایجاد حساب آزمایشی، رمز عبور باید دست‌کم شامل **یک حرف انگلیسی، یک عدد و یکی از کاراکترهای `@` یا `&`** باشد؛ نام کاربری هم باید حداقل سه نویسه از حروف انگلیسی، اعداد یا `_` داشته باشد.
+- Full name
+- Username
+- Email address
+- Password
 
-### اجرای برنامه
+The application validates the information and saves the manager account locally.
 
-از **پوشه اصلی پروژه** اجرا کنید:
+Only one manager account is supported by the initial setup process.
+
+After signing in as the manager, you can create coach and member accounts from the manager panel.
+
+**Input requirements:**
+
+- Usernames must contain at least three characters and may include English letters, numbers, and underscores.
+- Passwords must contain at least one English letter, one number, and either `@` or `&`.
+- Email addresses must follow a valid email format.
+
+### 4. Run the Application
+
+From the project root directory, run:
 
 ```bash
 python main.py
 ```
 
-منوی اصلی شامل ورود مدیر، مربی، عضو و خروج است. بعد از ورود موفق، پنل متناسب با نقش نمایش داده می‌شود.
+The main menu provides four options:
 
-> مهم: دستورات را از ریشه مخزن اجرا کنید؛ بعضی فایل‌های داده با مسیر نسبی `data/` خوانده می‌شوند.
+```text
+1. Manager Login
+2. Coach Login
+3. Member Login
+4. Exit
+```
 
-## فایل‌ها و پوشه‌ها
+After successful authentication, the application opens the appropriate panel for the user's role.
+
+**Important:** Run the commands from the project root directory because some data files use relative paths.
+
+## Project Structure
 
 ```text
 Gym-Managment-System/
-├── main.py                         # منوی اصلی و اتصال پنل‌ها
-├── setup_manager.py                # ساخت مدیر اولیه
-├── Bank.py                         # واسط بانکی آموزشی
+├── main.py
+├── setup_manager.py
+├── Bank.py
 ├── requirements.txt
 ├── README.md
 ├── LICENSE
-├── data/                           # داده‌های متنی و محلی برنامه
+├── data/
 ├── docs/
 │   └── flowchart/
 │       └── system_flowchart.png
 ├── src/
-│   ├── admin/                      # مدیریت کاربران، سالن، کلاس، اشتراک و گزارش‌ها
-│   ├── auth/                       # احراز هویت
-│   ├── coach/                      # پنل مربی و برنامه تمرینی
-│   ├── member/                     # پنل عضو، ثبت‌نام، کیف پول و اشتراک
-│   ├── models/                     # مدل‌های شیءگرا و ابزار فایل
-│   ├── storage/                    # عملیات عمومی فایل
-│   ├── logging/                    # ثبت فعالیت‌ها
-│   ├── validation/                 # اعتبارسنجی ورودی‌ها
-│   ├── generators/                 # ژنراتورها
-│   └── utils/                      # توابع کمکی منوها
-└── tests/                          # تست‌های خودکار
+│   ├── admin/
+│   ├── auth/
+│   ├── coach/
+│   ├── member/
+│   ├── models/
+│   ├── storage/
+│   ├── logging/
+│   ├── validation/
+│   ├── generators/
+│   └── utils/
+└── tests/
 ```
 
-اطلاعات کاربران، سالن‌ها، کلاس‌ها، ثبت‌نام‌ها، برنامه‌های تمرینی، تراکنش‌ها، اشتراک‌ها و لاگ فعالیت‌ها حسب نیاز در فایل‌های متنی پوشه `data` نگهداری می‌شوند. ممکن است بعضی فایل‌ها در اولین اجرا هنوز وجود نداشته باشند و در زمان استفاده ساخته شوند.
+### Main Components
 
-## فلوچارت
+| Component | Description |
+|---|---|
+| `main.py` | Main application menu and role-based navigation |
+| `setup_manager.py` | Initial manager account setup |
+| `Bank.py` | Educational banking simulation |
+| `src/admin/` | User, hall, class, subscription, and report management |
+| `src/auth/` | Authentication |
+| `src/coach/` | Coach panel and workout management |
+| `src/member/` | Member panel, enrollment, wallet, and subscriptions |
+| `src/models/` | Data models |
+| `src/storage/` | File storage utilities |
+| `src/logging/` | Activity logging |
+| `src/validation/` | Input validation |
+| `src/generators/` | Generator-based utilities |
+| `src/utils/` | Shared helper functions |
+| `data/` | Local application data |
+| `tests/` | Automated tests |
 
-فلوچارت ساده مسیر اصلی برنامه، ورود و پنل‌های کاربران:
+## Data Storage
 
-![فلوچارت سامانه مدیریت باشگاه](docs/flowchart/system_flowchart.png)
+The application uses text files to store information such as:
 
-## اجرای تست‌ها
+- User accounts
+- Gym halls
+- Classes
+- Enrollments
+- Workout plans
+- Wallet transactions
+- Subscriptions
+- Activity logs
 
-برای اجرای کل مجموعه تست‌ها:
+Some data files are created automatically when the related features are used.
+
+Local files may contain sensitive information and should not be committed to a public repository with real user data.
+
+## System Flowchart
+
+The following flowchart illustrates the application's main navigation and role-based structure.
+
+![Gym Management System Flowchart](docs/flowchart/system_flowchart.png)
+
+## Testing
+
+The project includes automated tests for major components, including:
+
+- Authentication
+- User management
+- Hall and class management
+- Enrollment
+- Workout management
+- Wallet and transactions
+- Subscriptions
+- Reports
+- Storage and logging
+- Menu integration
+
+Run the complete test suite with:
 
 ```bash
 python -m pytest -q
 ```
 
-برای اجرای فقط تست احراز هویت با `unittest`:
+You can also run the authentication tests separately:
 
 ```bash
 python -m unittest tests/test_auth.py
 ```
 
-**نتیجه بررسی نسخه ثبت‌شده در زمان آماده‌سازی این README: `221 passed`.** این نتیجه مربوط به تست‌های خودکار موجود در پروژه است و جایگزین تست دستی تمام سناریوها روی سیستم مقصد نیست.
+**Latest local test result: 221 tests passed.**
 
-تست‌ها بخش‌هایی از احراز هویت، مدیریت کاربران، سالن‌ها و کلاس‌ها، ثبت‌نام، برنامه تمرینی، کیف پول، اشتراک، گزارش‌ها، ذخیره‌سازی، لاگ و اتصال منوها را پوشش می‌دهند.
+Automated tests help verify functionality but do not guarantee that every possible scenario is error-free.
 
-## اعضای تیم
+## Team & Contributions
 
-| عضو | مسئولیت اصلی |
+This project was developed collaboratively by five team members as part of the Python Alpha QBC13 final project.
+
+| Team Member | Main Contributions |
 |---|---|
-| امیر | سرپرستی، ساختار پروژه، `main.py`، احراز هویت، ذخیره‌سازی عمومی، لاگ، توابع کمکی و یکپارچه‌سازی |
-| فاطمه | مدل و مدیریت کاربران و اعتبارسنجی |
-| عاطفه | سالن‌ها، کلاس‌ها، ذخیره‌سازی مرتبط و Generatorها |
-| آرین J | کیف پول، تراکنش‌ها، اشتراک‌ها و پرداخت آموزشی |
-| آرین G | پنل مربی و عضو، ثبت‌نام، برنامه تمرینی و گزارش‌های مرتبط |
+| **Amir** | Team leadership, project structure, main application, authentication, shared storage, logging, helper utilities, and integration |
+| **Fatemeh** | User models, user management, and validation |
+| **Atefeh** | Hall management, class management, related storage, and generators |
+| **Arian J** | Wallet, transactions, subscriptions, and simulated payments |
+| **Arian G** | Coach and member panels, class enrollment, workout management, and related reports |
 
-## نکات امنیتی و محدودیت‌ها
+The project was developed through feature-based collaboration using Git and GitHub.
 
-این پروژه **آموزشی** است و برای استفاده تجاری یا نگهداری اطلاعات مالی واقعی آماده نیست.
+## Security Notes & Limitations
 
-- در پیاده‌سازی فعلی، رمز عبور کاربران در فایل متنی ذخیره می‌شود و **هش نمی‌شود**؛ از رمزهای واقعی استفاده نکنید.
-- فایل‌های محلی مانند `data/users.txt`، `data/activity_logs.txt` و `data/halls.txt` نباید همراه اطلاعات شخصی واقعی در مخزن عمومی منتشر شوند.
-- `Bank.py` یک شبیه‌ساز آموزشی است؛ **اطلاعات کارت واقعی وارد نکنید**.
-- ثبت و پرداخت در فایل‌های متنی برای محیط آزمایشی مناسب است؛ برای استفاده واقعی، امنیت بیشتر، کنترل هم‌زمانی و ذخیره‌سازی قابل‌اعتمادتر لازم است.
-- پاس‌شدن تست‌های خودکار به معنی نبودن تمام خطاهای ممکن نیست.
+**This is an educational project and is not intended for production use.**
 
-## مجوز
+Please consider the following limitations:
 
-این پروژه تحت مجوز **MIT** منتشر شده است؛ متن مجوز در فایل [`LICENSE`](LICENSE) قرار دارد.
+- User passwords are currently stored in plain text rather than securely hashed.
+- Do not use real passwords or sensitive personal information.
+- The banking interface in `Bank.py` is a simulation and does not connect to a real payment gateway.
+- Do not enter real banking or payment-card information.
+- Text-file storage is suitable for learning purposes but is not designed for production-level concurrency or reliability.
+- Additional security measures, stronger authentication, and a database would be required for real-world deployment.
+
+## License
+
+This project is licensed under the **MIT License**.
+
+See the [LICENSE](LICENSE) file for details.
