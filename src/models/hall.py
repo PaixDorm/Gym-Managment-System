@@ -2,21 +2,21 @@ class Hall:
     def __init__(self, name, capacity, equipment, status):
         
         if not isinstance(name, str) or not name.strip():
-                raise ValueError("نام سالن نباید خالی باشد")
+                raise ValueError("Hall name cannot be empty.")
         if any(ch in name for ch in ("|", "\n", "\r")):
             raise ValueError(
-                "نام سالن شامل کاراکتر غیرمجاز است"
+                "Hall name contains forbidden characters."
             )
         self.name = name
 
         if type(capacity) is not int:
-            raise ValueError("لطفا مقدار معتبر وارد کنید")
+            raise ValueError("Please enter a valid integer.")
         if capacity <= 0:
-            raise ValueError("لطفا مقدار صحیح را وارد کنید")
+            raise ValueError("Value must be greater than zero.")
         self.capacity = capacity
 
         if not type(equipment) is list:
-            raise ValueError("لطفا یک لیست از تجهیزات وارد کنید")
+            raise ValueError("Equipment must be provided as a list.")
         for item in equipment:
             if (
                 not isinstance(item, str)
@@ -24,12 +24,12 @@ class Hall:
                 or any(ch in item for ch in (",", "|", "\n", "\r"))
             ):
                 raise ValueError(
-                    "نام تجهیزات شامل مقدار نامعتبر است"
+                    "Equipment contains an invalid name."
                 )
         self.equipment = equipment
         
         if not type(status) is bool:
-            raise ValueError("وضعیت باید فعال یا غیرفعال باشد")
+            raise ValueError("Status must be a boolean.")
         self.status = status
 
         

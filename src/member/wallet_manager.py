@@ -13,7 +13,7 @@ amount_regex = re.compile(r"^[1-9][0-9]*$")
 
 
 def validate_card_number(card_input):
-    """بررسی و اعتبارسنجی شماره کارت (دقیقاً ۱۶ رقم)"""
+    """Validate a card number containing exactly 16 digits."""
     if not isinstance(card_input, str):
         raise ValueError("Card number must be a string.")
     card_str = card_input.strip()
@@ -22,7 +22,7 @@ def validate_card_number(card_input):
     return card_str
 
 def validate_exp_month(month_input):
-    """بررسی و اعتبارسنجی ماه انقضا (بین ۱ تا ۱۲)"""
+    """Validate an expiration month between 1 and 12."""
     if not isinstance(month_input, str):
         raise ValueError("Expiration month must be a string.")
     month_str = month_input.strip()
@@ -31,7 +31,7 @@ def validate_exp_month(month_input):
     return int(month_str)
 
 def validate_exp_year(year_input):
-    """بررسی و اعتبارسنجی سال انقضا (چهار رقمی)"""
+    """Validate a four-digit expiration year."""
     if not isinstance(year_input, str):
         raise ValueError("Expiration year must be a string.")
     year_str = year_input.strip()
@@ -40,7 +40,7 @@ def validate_exp_year(year_input):
     return int(year_str)
 
 def validate_card_password(password_input):
-    """بررسی و اعتبارسنجی رمز دوم (دقیقاً ۶ رقم با حفظ صفرهای اولیه)"""
+    """Validate a six-digit payment password, preserving leading zeros."""
     if not isinstance(password_input, str):
         raise ValueError("Card payment password must be a string.")
     pass_str = password_input.strip()
@@ -49,7 +49,7 @@ def validate_card_password(password_input):
     return pass_str
 
 def validate_cvv2(cvv2_input):
-    """بررسی و اعتبارسنجی CVV2 (دقیقاً ۳ رقم)"""
+    """Validate a three-digit CVV2."""
     if not isinstance(cvv2_input, str):
         raise ValueError("CVV2 must be a string.")
     cvv2_str = cvv2_input.strip()
@@ -58,7 +58,7 @@ def validate_cvv2(cvv2_input):
     return cvv2_str
 
 def validate_amount(amount_input):
-    """بررسی و اعتبارسنجی مبلغ تراکنش"""
+    """Validate a transaction amount."""
     if not isinstance(amount_input, str):
         raise ValueError("Amount must be a string.")
     amount_str = amount_input.strip()
@@ -67,7 +67,7 @@ def validate_amount(amount_input):
     return int(amount_str)
 
 def validate_payment_inputs(card, month, year, password, cvv2, amount):
-    """تابع ترکیبی بررسی تمامی فیلدهای پرداخت"""
+    """Validate all payment fields together."""
     valid_card = validate_card_number(card)
     valid_month = validate_exp_month(month)
     valid_year = validate_exp_year(year)
@@ -80,11 +80,11 @@ current_dir = os.path.abspath(os.path.dirname(__file__))
 transactions_file_path = os.path.normpath(os.path.join(current_dir, "../../data/transactions.txt"))
 
 class StorageError(Exception):
-    """خطای اختصاصی برای مشکلات مربوط به ذخیره‌سازی و خواندن فایل‌ها"""
+    """Raised when reading or writing transaction files fails."""
     pass
 
 def _append_line(line):
-    """افزودن یک خط به انتهای فایل تراکنش‌ها با رمزگذاری utf-8"""
+    """Append a transaction record using UTF-8."""
     try:
         directory = os.path.dirname(transactions_file_path)
         if directory:
@@ -95,7 +95,7 @@ def _append_line(line):
         raise StorageError("Failed to save data to disk.") from None
 
 def _read_lines():
-    """خواندن تمام خطوط فایل؛ در صورت عدم وجود فایل، لیست خالی برمی‌گرداند"""
+    """Read transaction records; return an empty list if missing."""
     if not os.path.exists(transactions_file_path):
         return []
     try:
@@ -105,7 +105,7 @@ def _read_lines():
         raise StorageError("Failed to read data from disk.") from None
 
 def _load_transactions(strict=False):
-    """بارگذاری تمام تراکنش‌های فایل با قابلیت سخت‌گیری در برابر خطوط خراب"""
+    """Load transactions, optionally rejecting malformed records."""
     lines = _read_lines()
     transactions = []
     for idx, line in enumerate(lines, start=1):
@@ -122,11 +122,11 @@ def _load_transactions(strict=False):
     return transactions
 
 def get_all_transactions(strict=False):
-    """دریافت همه‌ی تراکنش‌ها (برای گزارش‌ها و تطبیق اشتراک‌ها)"""
+    """Return all transactions for reports and subscription reconciliation."""
     return _load_transactions(strict=strict)
 
 def get_balance(username):
-    """محاسبه موجودی فعلی کاربر از روی تاریخچه تراکنش‌ها (شارژ مثبت، اشتراک منفی)"""
+    """Calculate balance from transactions (charges positive, subscriptions negative)."""
     if not isinstance(username, str) or not username.strip():
         raise ValueError("Invalid username.")
     username = username.strip()
@@ -143,7 +143,7 @@ def get_balance(username):
     return balance
 
 def get_wallet(username):
-    """دریافت شیء کیف پول حاوی موجودی به‌دست‌آمده از تراکنش‌ها"""
+    """Return a wallet with its balance calculated from transactions."""
     if not isinstance(username, str) or not username.strip():
         raise ValueError("Invalid username.")
     username = username.strip()
@@ -151,7 +151,7 @@ def get_wallet(username):
     return Wallet(username, balance=current_balance)
 
 def get_transactions(username):
-    """دریافت لیست تراکنش‌های متعلق به کاربر بدون حساسیت به خطوط مخدوش احتمالی دیگر"""
+    """Return user transactions, ignoring unrelated malformed records."""
     if not isinstance(username, str) or not username.strip():
         raise ValueError("Invalid username.")
     username = username.strip()
@@ -159,7 +159,7 @@ def get_transactions(username):
     return [tx for tx in all_transactions if tx.username == username]
 
 def record_transaction(transaction):
-    """بررسی نوع تراکنش و افزودن آن به فایل با جلوگیری از ثبت تکراری"""
+    """Validate and record a transaction without duplicate tracking codes."""
     if not isinstance(transaction, Transaction):
         raise ValueError("Input must be a Transaction instance.")
     existing_transactions = _load_transactions(strict=False)
@@ -168,14 +168,14 @@ def record_transaction(transaction):
     _append_line(transaction.to_line())
 
 def _mask_receipt(card, payment_id):
-    """رسید ماسک‌شده: ۴ رقم اول کارت، ۸ ستاره، ۴ رقم آخر، سپس بقیه‌ی شناسه (مبلغ و عدد تصادفی)"""
+    """Mask receipt: first four digits, eight stars, last four, then payment suffix."""
     if not (isinstance(card, str) and isinstance(payment_id, str)
             and len(card) == 16 and payment_id.startswith(card) and len(payment_id) > 16):
         raise ValueError("Bank receipt cannot be masked.")
     return card[:4] + "*" * 8 + card[-4:] + payment_id[16:]
 
 def new_transaction(username, transaction_type, amount, description, when=None):
-    """ساخت تراکنش با شماره پیگیری یکتا (غیرتکراری نسبت به تراکنش‌های موجود)"""
+    """Create a transaction with a unique tracking code."""
     existing_codes = {tx.tracking_code for tx in _load_transactions(strict=True)}
     for _ in range(10):
         code = generate_tracking_code()
@@ -185,9 +185,9 @@ def new_transaction(username, transaction_type, amount, description, when=None):
     raise StorageError("Could not generate a unique tracking code.")
 
 def charge_wallet(username, card, month, year, password, cvv2, amount):
-    """شارژ کیف پول با اعتبارسنجی ورودی، تراکنش بانکی و ثبت در فایل"""
+    """Top up wallet with input validation, bank payment, and file recording."""
     valid_card, valid_month, valid_year, valid_pass, valid_cvv2, valid_amount = validate_payment_inputs(card, month, year, password, cvv2, amount)
-    transaction = new_transaction(username, "charge", valid_amount, "شارژ کیف پول")
+    transaction = new_transaction(username, "charge", valid_amount, "Wallet top-up")
     try:
         payment_result = API().pay(valid_card, valid_month, valid_year, valid_pass, valid_cvv2, valid_amount)
     except ValueError:

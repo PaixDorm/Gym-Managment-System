@@ -17,7 +17,7 @@ def generate_tracking_code():
     return f"TRX-{strtime}-{random_number}"
 
 def _validate_receipt(receipt):
-    """رسید باید None یا رسید ماسک‌ شده باشد (شماره‌ی کامل کارت هرگز ذخیره نمی‌شود)"""
+    """Require a masked receipt or None; never store a full card number."""
     if receipt is not None and (not isinstance(receipt, str) or not receipt_regex.fullmatch(receipt)):
         raise ValueError("Invalid bank receipt format; only masked receipts are accepted.")
 
@@ -58,19 +58,19 @@ class Transaction:
         self.receipt = receipt
 
     def attach_receipt(self, receipt):
-        """افزودن رسید ماسک‌شده‌ی بانک پس از تأیید پرداخت (با اعتبارسنجی)"""
+        """Validate and attach the masked receipt after bank approval."""
         _validate_receipt(receipt)
         self.receipt = receipt
 
     def to_line(self):
-        """تبدیل تراکنش به یک خط متنی با ۷ فیلد (فیلد آخر: رسید یا «-» اگر رسیدی نیست)"""
+        """Serialize as seven fields; the last is the receipt or a dash."""
         parts = [self.tracking_code, self.username, self.transaction_type, str(self.amount),
                  self.date.strftime(date_format), self.description, self.receipt or "-"]
         return separator.join(parts)
 
     @classmethod
     def from_line(cls, line):
-        """ساخت تراکنش از یک خط ذخیره‌شده"""
+        """Parse a transaction from a stored line."""
         if not isinstance(line, str):
             raise ValueError("Input line must be a string.")
         line = line.strip()

@@ -1,6 +1,6 @@
-"""تست‌های اشتراک (مدل‌ها و subscription_manager).
-اجرا از ریشه‌ی پروژه:  python -m pytest tests/test_subscriptions.py
-همه‌ی تست‌ها روی فایل موقت (tmp_path) اجرا می‌شوند و به data/ دست نمی‌زنند.
+"""Subscription model and manager tests.
+Run from the repository root: python -m pytest tests/test_subscriptions.py
+All tests use tmp_path and do not modify data/.
 """
 from datetime import date, datetime
 
@@ -18,7 +18,7 @@ D = date
 def env(tmp_path, monkeypatch):
     monkeypatch.setattr(wm, "transactions_file_path", str(tmp_path / "transactions.txt"))
     monkeypatch.setattr(sm, "subscription_file_path", str(tmp_path / "subscriptions.txt"))
-    monkeypatch.setattr(sm, "subscription_plans", dict(sm.subscription_plans))   # جدا از طرح‌های واقعی
+    monkeypatch.setattr(sm, "subscription_plans", dict(sm.subscription_plans))   # Isolate the plan catalog from other tests
     return tmp_path
 
 def fund(username, amount):
@@ -177,7 +177,7 @@ def test_corrupted_subscription_row_is_reported_not_ignored(env):
         sm.get_subscription_state("sara_k", D(2026, 10, 20))
     assert "line 1" in str(info.value)
     with pytest.raises(wm.StorageError):
-        sm.buy_subscription("sara_k", 1, today=D(2026, 10, 20))        # خرید روی داده‌ی ناقص انجام نمی‌شود
+        sm.buy_subscription("sara_k", 1, today=D(2026, 10, 20))        # Do not purchase against corrupted data
     assert count(env / "transactions.txt") == 2
 
 def test_state_current_subscription_and_days_left(env):
@@ -191,7 +191,7 @@ def test_state_current_subscription_and_days_left(env):
     assert sm.get_current_subscription("sara_k", D(2026, 10, 20)).start_date == D(2026, 10, 10)
     assert sm.get_subscription_state("sara_k", D(2026, 11, 9)) == "expired"
     assert sm.has_active_subscription("sara_k", D(2026, 11, 9)) is False
-    assert sm.get_current_subscription("sara_k", D(2026, 11, 9)).end_date == D(2026, 11, 9)   # برای منقضی: آخرین
+    assert sm.get_current_subscription("sara_k", D(2026, 11, 9)).end_date == D(2026, 11, 9)   # Return the latest subscription if expired
 
 def test_set_plan_changes_price_and_validates(env):
     sm.set_plan(1, 120000)
@@ -212,7 +212,7 @@ def test_reports(env):
     assert sm.get_revenue_by_type() == {1: 200000, 3: 250000}
     report = sm.get_payments_report()
     assert len(report) == 3
-    assert report[0]["username"] == "arash" and report[0]["plan"] == "یک‌ماهه"          # جدیدترین اول
+    assert report[0]["username"] == "arash" and report[0]["plan"] == "1-month"          # Newest first
     assert set(report[0]) == {"username", "plan", "months", "amount", "payment_date", "start_date", "end_date", "tracking_code"}
     assert sm.get_members_status(["sara_k", "arash", "nobody"], D(2026, 10, 20)) == \
            {"sara_k": "active", "arash": "active", "nobody": "none"}
