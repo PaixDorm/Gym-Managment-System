@@ -164,7 +164,7 @@ def test_disk_failure_after_bank_gives_traceable_error(files, monkeypatch):
         wm.charge_wallet("sara_k", *GOOD)
     message = str(info.value)
     assert "6037********7890" in message and CARD not in message
-    assert "دوباره پرداخت نکنید" in message
+    assert "Do not pay again" in message
 
 
 def test_transient_disk_failure_is_retried_once(files, monkeypatch):
@@ -192,7 +192,7 @@ def test_corrupted_line_history_skips_but_balance_stops(files):
     assert len(wm.get_transactions("sara_k")) == 1
     with pytest.raises(wm.StorageError) as info:
         wm.get_balance("sara_k")
-    assert "شماره خط" in str(info.value)
+    assert "line" in str(info.value)
 
 def test_negative_balance_in_data_is_reported(files):
     wm.record_transaction(Transaction("zed", "subscription", 100, "x"))

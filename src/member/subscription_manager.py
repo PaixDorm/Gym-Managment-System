@@ -16,7 +16,7 @@ subscription_plans = {
 def _append_subscription(sub):
     """افزودن یک خط اشتراک به انتهای فایل با رمزگذاری utf-8"""
     if not isinstance(sub, Subscription):
-        raise ValueError("ورودی باید از نوع شیء Subscription باشد.")
+        raise ValueError("Input must be a Subscription instance.")
     try:
         directory = os.path.dirname(subscription_file_path)
         if directory:
@@ -25,7 +25,7 @@ def _append_subscription(sub):
         with open(subscription_file_path, "a", encoding="utf-8") as f:
             f.write(sub.to_line() + "\n")
     except OSError:
-        raise StorageError("خطا در ذخیره‌سازی اطلاعات اشتراک روی دیسک.") from None
+        raise StorageError("Failed to save subscription data to disk.") from None
 
 def _read_subscription_lines():
     """خواندن تمام خطوط فایل اشتراک‌ها؛ در صورت عدم وجود فایل، لیست خالی برمی‌گرداند"""
@@ -35,7 +35,7 @@ def _read_subscription_lines():
         with open(subscription_file_path, "r", encoding="utf-8") as f:
             return f.readlines()
     except OSError:
-        raise StorageError("خطا در خواندن فایل اشتراک‌ها از روی دیسک.") from None
+        raise StorageError("Failed to read subscription data from disk.") from None
 
 def _load_subscriptions(strict=False):
     """بارگذاری تمام اشتراک‌های ذخیره‌شده با قابلیت کنترل strict"""
@@ -50,7 +50,7 @@ def _load_subscriptions(strict=False):
             subscriptions.append(sub)
         except ValueError:
             if strict:
-                raise StorageError(f"خطای داده‌های ذخیره‌شده در شماره خط {idx}: فرمت خط اشتراک نامعتبر است.") from None
+                raise StorageError(f"Invalid saved subscription data on line {idx}: invalid record format.") from None
             continue
     return subscriptions
 
@@ -68,12 +68,12 @@ def _resolve_today(today):
     if today is None:
         return date.today()
     if type(today) is not date:
-        raise ValueError("تاریخ امروز باید از نوع date باشد.")
+        raise ValueError("Today must be a date object.")
     return today
 
 def _clean_username(username):
     if not isinstance(username, str) or not username.strip():
-        raise ValueError("نام کاربری نامعتبر است.")
+        raise ValueError("Invalid username.")
     return username.strip()
 
 def get_plans():
@@ -83,9 +83,9 @@ def get_plans():
 def get_plan(months):
     """دریافت طرح اشتراک بر اساس تعداد ماه با ولیدیشن دقیق نوع داده"""
     if isinstance(months, bool) or not isinstance(months, int):
-        raise ValueError("تعداد ماه‌های اشتراک باید یک عدد صحیح باشد.")
+        raise ValueError("Subscription duration must be an integer number of months.")
     if months not in subscription_plans:
-        raise ValueError(f"طرح اشتراکی برای مدت {months} ماه وجود ندارد.")
+        raise ValueError(f"No subscription plan is available for {months} months.")
     return subscription_plans[months]
 
 def set_plan(months, price):
@@ -142,11 +142,11 @@ def get_days_left(username, today=None):
 def buy_subscription(username, months, today=None):
     """خرید یا تمدید اشتراک با ثبت معلق اولیه و مدیریت ایمن تراکنش مالی"""
     if not isinstance(username, str) or not username.strip():
-        raise ValueError("نام کاربری نامعتبر است.")
+        raise ValueError("Invalid username.")
     username = username.strip()
     supplied_today = today is not None
     if supplied_today and type(today) is not date:
-        raise ValueError("تاریخ امروز باید از نوع date باشد.")
+        raise ValueError("Today must be a date object.")
     if today is None:
         today = date.today()
     when = (
@@ -198,7 +198,7 @@ def buy_subscription(username, months, today=None):
                 tx = temp_tx
                 break
         else:
-            raise StorageError("شماره پیگیری یکتا ساخته نشد.")
+            raise StorageError("Could not generate a unique tracking code.")
         sub = Subscription(
             username=username,
             months=months,
@@ -208,26 +208,26 @@ def buy_subscription(username, months, today=None):
             payment_date=today)
     wallet = get_wallet(username)
     if not wallet.has_enough(amount):
-        raise InsufficientBalanceError("موجودی کیف پول کافی نیست.")
+        raise InsufficientBalanceError("Insufficient wallet balance.")
     if pending is None:
         try:
             _append_subscription(sub)
         except StorageError:
             persisted = next((s for s in _load_subscriptions(strict=True) if s.tracking_code == sub.tracking_code), None)
             if persisted is None:
-                raise StorageError("ثبت اشتراک انجام نشد؛ مبلغی کسر نشد.") from None
+                raise StorageError("Subscription could not be recorded; no amount was deducted.") from None
             sub = persisted
     try:
         record_transaction(tx)
     except StorageError:
         recorded = next((t for t in get_all_transactions() if t.tracking_code == tx.tracking_code), None)
         if recorded is None:
-            raise StorageError(f"خرید معلق ماند و مبلغی کسر نشد. شماره پیگیری: {tx.tracking_code}") from None
+            raise StorageError(f"Purchase is pending and no amount was deducted. Tracking code: {tx.tracking_code}") from None
         if (recorded.username != username or recorded.transaction_type != "subscription" or recorded.amount != amount):
-            raise StorageError("شماره پیگیری با تراکنش نامرتبط تداخل دارد.")
+            raise StorageError("Tracking code conflicts with an unrelated transaction.")
     recorded = next((t for t in get_all_transactions() if t.tracking_code == tx.tracking_code), None)
     if (recorded is None or recorded.username != username or recorded.transaction_type != "subscription" or recorded.amount != amount):
-        raise StorageError("پرداخت هنوز تأیید نشده؛ از پرداخت مجدد خودداری کنید.")
+        raise StorageError("Payment is not confirmed; do not pay again.")
     return sub
 
 def get_all_subscriptions():
@@ -247,7 +247,7 @@ def get_members_status(usernames, today=None):
     """وضعیت اشتراک هر عضو؛ فهرست نام‌ها را پنل مدیر می‌دهد (عضو بدون خرید: 'none')"""
     today = _resolve_today(today)
     if not isinstance(usernames, (list, tuple, set)):
-        raise ValueError("فهرست نام‌های کاربری باید لیست باشد.")
+        raise ValueError("Usernames must be provided as a list, tuple, or set.")
     cleaned = [_clean_username(u) for u in usernames]
     paid = _load_paid_subscriptions()
     result = {}

@@ -14,7 +14,7 @@ def test_member_status():
     ):
         subscription_panel()
         status.assert_called_once_with(["sara"])
-        output.assert_any_call("Sara (sara): بدون اشتراک")
+        output.assert_any_call("Sara (sara): No subscription")
 
 
 def test_purchase_uses_finance():

@@ -139,7 +139,7 @@ def test_subscription_write_failure_charges_nothing(env, monkeypatch):
     monkeypatch.setattr(sm, "_append_subscription", boom)
     with pytest.raises(wm.StorageError) as info:
         sm.buy_subscription("sara_k", 1, today=D(2026, 10, 10))
-    assert "مبلغی کسر نشد" in str(info.value)
+    assert "no amount was deducted" in str(info.value)
     assert wm.get_balance("sara_k") == 500000
     assert sm.get_user_subscriptions("sara_k") == []
 
@@ -175,7 +175,7 @@ def test_corrupted_subscription_row_is_reported_not_ignored(env):
     path.write_text(path.read_text(encoding="utf-8").replace(" | sara_k | ", " | sara_k | oops | "), encoding="utf-8")
     with pytest.raises(wm.StorageError) as info:
         sm.get_subscription_state("sara_k", D(2026, 10, 20))
-    assert "شماره خط 1" in str(info.value)
+    assert "line 1" in str(info.value)
     with pytest.raises(wm.StorageError):
         sm.buy_subscription("sara_k", 1, today=D(2026, 10, 20))        # خرید روی داده‌ی ناقص انجام نمی‌شود
     assert count(env / "transactions.txt") == 2

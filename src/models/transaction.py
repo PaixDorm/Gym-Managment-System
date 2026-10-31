@@ -5,7 +5,7 @@ valid_types = {"charge", "subscription"}
 separator = " | "
 forbidden_chars = ("|", "\n", "\r")
 date_format = "%Y-%m-%d %H:%M:%S"
-translations = {"charge": "شارژ حساب", "subscription": "خرید اشتراک"}
+translations = {"charge": "Wallet top-up", "subscription": "Subscription purchase"}
 traking_number_regex = re.compile(r"^TRX-[0-9]{14}-[0-9]{4,8}$")
 amount_regex = re.compile(r"^[0-9]+$")
 receipt_regex = re.compile(r"^[0-9]{4}\*{8}[0-9]{4}[0-9]{7,}$")
@@ -19,33 +19,33 @@ def generate_tracking_code():
 def _validate_receipt(receipt):
     """رسید باید None یا رسید ماسک‌ شده باشد (شماره‌ی کامل کارت هرگز ذخیره نمی‌شود)"""
     if receipt is not None and (not isinstance(receipt, str) or not receipt_regex.fullmatch(receipt)):
-        raise ValueError("فرمت رسید بانکی نامعتبر است؛ فقط رسید ماسک‌شده پذیرفته می‌شود.")
+        raise ValueError("Invalid bank receipt format; only masked receipts are accepted.")
 
 class Transaction:
     def __init__(self, username, transaction_type, amount, description, date=None, tracking_code=None, receipt=None):
         if not isinstance(username, str) or not username.strip():
-            raise ValueError("نام کاربری باید یک رشته معتبر و غیرخالی باشد.")
+            raise ValueError("Username must be a non-empty string.")
         username = username.strip()
         if any(ch in username for ch in forbidden_chars):
-            raise ValueError("نام کاربری نمی‌تواند شامل کاراکتر | یا کاراکتر خط جدید باشد.")
+            raise ValueError("Username cannot contain '|' or newline characters.")
         if not isinstance(transaction_type, str) or transaction_type not in valid_types:
-            raise ValueError(f"نوع تراکنش نامعتبر است. موارد مجاز: {valid_types}")
+            raise ValueError(f"Invalid transaction type. Allowed types: {valid_types}")
         if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
-            raise ValueError("مبلغ باید یک عدد صحیح و مثبت باشد.")
+            raise ValueError("Amount must be a positive integer.")
         if not isinstance(description, str) or not description.strip():
-            raise ValueError("توضیحات باید یک رشته معتبر و غیرخالی باشد.")
+            raise ValueError("Description must be a non-empty string.")
         description = description.strip()
         if any(ch in description for ch in forbidden_chars):
-            raise ValueError("توضیحات نمی‌تواند شامل کاراکتر | یا کاراکتر خط جدید باشد.")
+            raise ValueError("Description cannot contain '|' or newline characters.")
         if date is None:
             date = datetime.now().replace(microsecond=0)
         elif not isinstance(date, datetime):
-            raise ValueError("تاریخ باید از نوع شیء datetime باشد.")
+            raise ValueError("Date must be a datetime object.")
         if tracking_code is None:
             tracking_code = generate_tracking_code()
         else:
             if not isinstance(tracking_code, str) or not traking_number_regex.fullmatch(tracking_code):
-                raise ValueError("فرمت شماره پیگیری نامعتبر است.")
+                raise ValueError("Invalid tracking code format.")
 
         _validate_receipt(receipt)
 
@@ -72,23 +72,23 @@ class Transaction:
     def from_line(cls, line):
         """ساخت تراکنش از یک خط ذخیره‌شده"""
         if not isinstance(line, str):
-            raise ValueError("خط ورودی باید از نوع رشته باشد.")
+            raise ValueError("Input line must be a string.")
         line = line.strip()
         parts = line.split(separator)
         if len(parts) not in (6, 7):
-            raise ValueError("تعداد اجزای خط نامعتبر است؛ باید ۶ یا ۷ بخش باشد.")
+            raise ValueError("Invalid transaction record: expected 6 or 7 fields.")
         tracking_code, username, transaction_type, amount_str, date_str, description = parts[:6]
         receipt = parts[6] if len(parts) == 7 and parts[6] != "-" else None
         if not amount_regex.fullmatch(amount_str):
-            raise ValueError("مبلغ موجود در خط ورودی معتبر نیست.")
+            raise ValueError("Invalid amount in transaction record.")
         try:
             amount = int(amount_str)
         except ValueError:
-            raise ValueError("مبلغ موجود در خط ورودی معتبر نیست.") from None
+            raise ValueError("Invalid amount in transaction record.") from None
         try:
             date_obj = datetime.strptime(date_str, date_format)
         except ValueError:
-            raise ValueError("فرمت تاریخ موجود در خط ورودی نامعتبر است.") from None
+            raise ValueError("Invalid date format in transaction record.") from None
         return cls(username=username, transaction_type=transaction_type, amount=amount, description=description,
                    date=date_obj, tracking_code=tracking_code, receipt=receipt)
 
@@ -96,8 +96,8 @@ class Transaction:
         persian_type = translations.get(self.transaction_type, self.transaction_type)
         formatted_amount = f"{self.amount:,}"
         formatted_date = self.date.strftime(date_format)
-        text = (f"تراکنش [{self.tracking_code}] | {persian_type} | مبلغ: {formatted_amount} تومان | "
-                f"کاربر: {self.username} | تاریخ: {formatted_date} | توضیحات: {self.description}")
+        text = (f"Transaction [{self.tracking_code}] | {persian_type} | Amount: {formatted_amount} Toman | "
+                f"User: {self.username} | Date: {formatted_date} | Description: {self.description}")
         if self.receipt:
-            text += f" | رسید بانک: {self.receipt}"
+            text += f" | Bank receipt: {self.receipt}"
         return text

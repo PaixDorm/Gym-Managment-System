@@ -3,17 +3,17 @@ class InsufficientBalanceError(Exception):
 
 def _validate_amount(amount):
     if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
-        raise ValueError("مبلغ باید یک عدد صحیح و مثبت باشد.")
+        raise ValueError("Amount must be a positive integer.")
 
 class Wallet:
     def __init__(self, username, balance=0):
         if not isinstance(username, str) or not username.strip():
-            raise ValueError("نام کاربری باید یک رشته معتبر و غیرخالی باشد.")
+            raise ValueError("Username must be a non-empty string.")
         username = username.strip()
         if "|" in username or "\n" in username or "\r" in username:
-            raise ValueError("نام کاربری نمی‌تواند شامل جداکننده یا کاراکترهای کنترلی باشد.")
+            raise ValueError("Username cannot contain separators or control characters.")
         if not isinstance(balance, int) or isinstance(balance, bool) or balance < 0:
-            raise ValueError("موجودی اولیه باید یک عدد صحیح و نامنفی باشد.")
+            raise ValueError("Initial balance must be a non-negative integer.")
         self.username = username
         self.__balance = balance
 
@@ -33,7 +33,7 @@ class Wallet:
     def withdraw(self, amount):
         _validate_amount(amount)
         if not self.has_enough(amount):
-            raise InsufficientBalanceError(f"موجودی ناکافی. موجودی فعلی: {self.__balance}, مبلغ درخواستی: {amount}")
+            raise InsufficientBalanceError(f"Insufficient balance. Current balance: {self.__balance}, requested amount: {amount}")
         self.__balance -= amount
         return self.__balance
 
@@ -43,7 +43,7 @@ class Wallet:
     @classmethod
     def from_dict(cls, data):
         if not isinstance(data, dict):
-            raise ValueError("داده ورودی باید از نوع دیکشنری باشد.")
+            raise ValueError("Input data must be a dictionary.")
         if "username" not in data or "balance" not in data:
-            raise ValueError("دیکشنری ورودی باید دارای کلیدهای username و balance باشد.")
+            raise ValueError("Input dictionary must contain username and balance keys.")
         return cls(username=data["username"], balance=data["balance"])
