@@ -1,6 +1,6 @@
-"""تست‌های کیف پول، تراکنش و شارژ (wallet_manager).
-اجرا از ریشه‌ی پروژه:  python -m pytest tests/test_wallet.py
-همه‌ی تست‌ها روی فایل موقت (tmp_path) اجرا می‌شوند و به data/ دست نمی‌زنند.
+"""Wallet, transaction, and top-up tests.
+Run from the repository root: python -m pytest tests/test_wallet.py
+All tests use tmp_path and do not modify data/.
 """
 import pytest
 from src.member import wallet_manager as wm
@@ -11,12 +11,12 @@ CARD = "6037991234567890"
 GOOD = (CARD, "9", "1405", "012345", "123", "200000")   # card, month, year, password, cvv2, amount
 
 class FakeBankReject:
-    """بانک جعلی که همیشه رد می‌کند"""
+    """Fake bank that always rejects payments."""
     def pay(self, *args):
         raise ValueError("Invalid payment details.")
 
 class CountingBank:
-    """بانک جعلی که تعداد فراخوانی‌ها را می‌شمارد"""
+    """Fake bank that counts payment calls."""
     calls = 0
     def pay(self, card, month, year, password, cvv2, amount):
         CountingBank.calls += 1
@@ -101,7 +101,7 @@ def test_charge_with_real_bank_increases_balance(files):
 def test_receipt_is_masked_stored_and_survives_reload(files):
     tx = wm.charge_wallet("sara_k", *GOOD)
     content = files.read_text(encoding="utf-8")
-    assert CARD not in content                      # شماره‌ی کامل کارت هرگز ذخیره نمی‌شود
+    assert CARD not in content                      # Never store the full card number
     assert "6037********7890200000" in content
     stored = wm.get_transactions("sara_k")[0]
     assert stored.receipt == tx.receipt and stored.tracking_code == tx.tracking_code

@@ -4,37 +4,37 @@ class GymClass:
     def __init__(self, title, sport, coach, time, day, hall, capacity, status):
 
         if not isinstance(title, str) or not title.strip():
-            raise ValueError("نام کلاس نباید خالی باشد")
+            raise ValueError("Class name cannot be empty.")
         self.title = title
         
         if not isinstance(sport, str) or not sport.strip():
-            raise ValueError("رشته ورزشی نباید خالی باشد ")
+            raise ValueError("Sport cannot be empty.")
         self.sport = sport
 
         if not isinstance(coach, str) or not coach.strip():
-           raise ValueError("نام کاربری مربی معتبر نیست")
+           raise ValueError("Invalid coach username.")
         self.coach = coach
 
         if not isinstance(time, Time):
-            raise ValueError("زمان کلاس باید از نوع time باشد")
+            raise ValueError("Class time must be a time object.")
         self.time = time
 
         if not isinstance(day, str) or not day.strip():
-            raise ValueError("روز ورزش نباید خالی باشد")
+            raise ValueError("Class day cannot be empty.")
         self.day = day
 
         if type(hall) is not int:
-            raise ValueError("لطفا مقدار معتبر وارد کنید")
+            raise ValueError("Please enter a valid integer.")
         if hall <= 0:
-            raise ValueError("لطفا مقدار صحیح را وارد کنید")
+            raise ValueError("Value must be greater than zero.")
         self.hall = hall
 
         if type(capacity) is not int:
-            raise ValueError("لطفا مقدار معتبر وارد کنید")
+            raise ValueError("Please enter a valid integer.")
         if capacity <= 0:
-            raise ValueError("لطفا مقدار صحیح را وارد کنید")
+            raise ValueError("Value must be greater than zero.")
         self.capacity = capacity
 
         if not type(status) is bool:
-            raise ValueError("وضعیت باید فعال یا غیرفعال باشد")
+            raise ValueError("Status must be a boolean.")
         self.status = status

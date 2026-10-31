@@ -10,7 +10,7 @@ from src.models.hall import Hall
 class TestHallManager(unittest.TestCase):
 
     def setUp(self):
-        # برای هر تست، یک فایل سالن جداگانه می‌سازیم
+        # Use an isolated hall file for each test
         self.temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp_dir.cleanup)
 

@@ -3,7 +3,8 @@ from src.models.transaction import traking_number_regex
 
 valid_months = {1, 3, 6}
 days_per_month = 30
-month_to_persian = {1: "یک‌ماهه", 3: "سه‌ماهه", 6: "شش‌ماهه"}
+month_to_persian = {1: "یک‌ماهه", 3: "سه‌ماهه", 6: "شش‌ماهه"}  # Legacy labels for compatibility.
+month_to_english = {1: "1-month", 3: "3-month", 6: "6-month"}
 
 class SubscriptionPlan:
     def __init__(self, months, price):
@@ -20,7 +21,7 @@ class SubscriptionPlan:
 
     @property
     def title(self):
-        return month_to_persian.get(self.months, "")
+        return month_to_english.get(self.months, "")
 
     def to_dict(self):
         return {"months": self.months, "price": self.price}
@@ -82,11 +83,11 @@ class Subscription:
         return max(0, delta.days)
 
     def to_dict(self):
-        """تبدیل اشتراک به دیکشنری با تبدیل تاریخ‌ها به رشته‌های ISO"""
+        """Convert subscription to a dictionary with ISO-formatted dates."""
         return {"username": self.username, "months": self.months, "amount": self.amount, "start_date": self.start_date.isoformat(), "tracking_code": self.tracking_code, "payment_date": self.payment_date.isoformat()}
 
     def to_line(self):
-        """تبدیل اطلاعات اشتراک به یک خط متنی جدا شده با جداکننده (بدون ذخیره تاریخ پایان)"""
+        """Serialize subscription as a delimited line, excluding the end date."""
         parts = [
             self.tracking_code,
             self.username,
@@ -100,7 +101,7 @@ class Subscription:
 
     @classmethod
     def from_line(cls, line):
-        """ساخت شیء اشتراک از روی یک خط متنی"""
+        """Parse a subscription from a stored line."""
         if not isinstance(line, str):
             raise ValueError("Input line must be a string.")
         line = line.strip()
@@ -145,7 +146,7 @@ class Subscription:
             raise ValueError("Invalid subscription record: expected 6 or 7 fields.")
 
 def next_start_date(latest_subscription, today=None):
-    """محاسبه تاریخ شروع اشتراک جدید برای تمدید"""
+    """Determine the start date for a renewed subscription."""
     if today is None:
         today = date.today()
     elif type(today) is not date:

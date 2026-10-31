@@ -4,16 +4,16 @@ def read_file(path):
             content = file.read()
             return content
     except FileNotFoundError :
-        print("فایل پیدا نشد")
+        print("File not found.")
         return None
     except PermissionError :
-        print("اجازه خواندن فایل وجود ندارد")
+        print("Permission denied while reading the file.")
         return None
     except UnicodeError :
-        print("امکان خواندن با اینکودینگ مورد نظر وجد ندارد")
+        print("Unable to decode the file using UTF-8.")
         return None
     except OSError :
-        print("اجرا با خطا مواجه شد")
+        print("File read failed.")
         return None
 def write_file(path,content):
     try:
@@ -21,13 +21,13 @@ def write_file(path,content):
             file.write(content)
             return True
     except PermissionError:
-        print("نوشتن ممکن نمیباشد")
+        print("Permission denied while writing the file.")
         return False
     except UnicodeError :
-        print("هنگام نوشتن خظایی رخ داد")
+        print("Unable to encode the file content.")
         return False
     except OSError :
-        print("جرا با خطا مواجه شد")
+        print("File write failed.")
         return False
 def append_file(path,content):
     try :
@@ -35,10 +35,10 @@ def append_file(path,content):
             file.write(content)
             return True
     except OSError :
-        print("خطایی رخ داد")
+        print("File append failed.")
         return False
     except UnicodeError :
-        print("هنگام اینکود کردن خطایی رخ داد")
+        print("Unable to encode the appended content.")
         return False
 def update_file(path,old_content,new_content):
     content = read_file(path)
