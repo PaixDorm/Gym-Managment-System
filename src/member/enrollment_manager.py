@@ -42,17 +42,17 @@ class EnrollmentManager:
 
     def enroll(self, username, class_id, cls, is_subscription_active):
         if str(cls["id"]) != str(class_id):
-            raise ValueError("شناسۀ کلاس معتبر نیست")
+            raise ValueError("Invalid class ID.")
         if cls["status"] != "active":
-            raise PermissionError("این کلاس فعال نیست")
+            raise PermissionError("This class is inactive.")
         if not is_subscription_active:
-            raise PermissionError("اشتراک شما فعال نیست")
+            raise PermissionError("Your subscription is inactive.")
         if self.is_member_enrolled_in_this_class(username, class_id):
-            raise PermissionError("شما قبلاً در این کلاس ثبت نام کرده اید")
+            raise PermissionError("You are already enrolled in this class.")
 
         active_members = self.get_active_members(class_id)
         if int(cls["capacity"]) <= len(active_members):
-            raise PermissionError("ظرفیت این کلاس پر است")
+            raise PermissionError("This class is full.")
         new_enroll = Enrollment.new_enrollment(username, str(class_id))
         all_enrolls = self.all_enrollments()
         all_enrolls.append(new_enroll)

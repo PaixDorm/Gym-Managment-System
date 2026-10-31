@@ -13,7 +13,7 @@ def get_all_classes_by_coach(coach_username):
         information = information.split(" | ")
 
         if len(information) != 9:
-            raise ValueError("فرمت اطلاعات این کلاس نامعتبر است")
+            raise ValueError("Invalid class data format.")
         if information[3] == coach_username:
             cls = {
                 "id": information[0],
@@ -38,54 +38,54 @@ class CoachPanel:
 
     def runner(self):
         while True:
-            print("\n===== پنل مربی =====")
-            print("1. مشاهدۀ کلاس های من")
-            print("2. مدیریت برنامۀ تمرینی اعضا")
-            print("3. خروج")
+            print("\n===== Coach Panel =====")
+            print("1. View my classes")
+            print("2. Manage member workout plans")
+            print("3. Exit")
 
-            choice = input("گزینۀ موردنظر: ").strip()
+            choice = input("Choose an option: ").strip()
 
             if choice == "1":
                 self.view_my_classes()
             elif choice == "2":
                 self.manage_workouts()
             elif choice == "3":
-                print("خروج از پنل مربی")
+                print("Leaving the coach panel.")
                 return
             else:
-                print("این گزینه نامعتبر است")
+                print("Invalid option.")
 
     def view_my_classes(self):
         classes = get_all_classes_by_coach(self.coach)
 
         if not classes:
-            print("شما هیچ کلاسی ندارید")
+            print("You have no assigned classes.")
             return
 
         for cls in classes:
             count = len(cls["enrolled"])
 
             print(f"\n[{cls['id']}] {cls['title']} ({cls['sport']})")
-            print(f"   سالن: {cls['hall']}")
-            print(f"   روز و ساعت: {cls['day']} {cls['time']}")
-            print(f"   ظرفیت پر شده: {count} از {cls['capacity']}")
+            print(f"   Hall: {cls['hall']}")
+            print(f"   Day and time: {cls['day']} {cls['time']}")
+            print(f"   Occupied places: {count} of {cls['capacity']}")
 
             if cls["enrolled"]:
-                print(f"   اعضای ثبت نام شده: {', '.join(cls['enrolled'])}")
+                print(f"   Enrolled members: {', '.join(cls['enrolled'])}")
             else:
-                print("   اعضای ثبت نام شده: ---")
+                print("   Enrolled members: ---")
 
     def manage_workouts(self):
         classes = get_all_classes_by_coach(self.coach)
 
         if not classes:
-            print("شما هیچ کلاسی برای مدیریت ندارید")
+            print("You have no classes to manage.")
             return
 
         for cls in classes:
             print(f"[{cls['id']}] {cls['title']}")
 
-        class_id = input("شناسۀ کلاس (یا back برای بازگشت): ").strip()
+        class_id = input("Class ID (or 'back' to return): ").strip()
         if class_id == "back":
             return
 
@@ -96,23 +96,23 @@ class CoachPanel:
                 break
 
         if chosen is None:
-            print("کلاس موردنظر شما پیدا نشد")
+            print("Class not found.")
             return
         if not chosen["enrolled"]:
-            print("هیچ عضوی در این کلاس ثبت نام نکرده است")
+            print("No members are enrolled in this class.")
             return
 
         for index, member in enumerate(chosen["enrolled"], start = 1):
             print(f"{index}. {member}")
 
         try:
-            index = int(input("شمارۀ عضو: "))
+            index = int(input("Member number: "))
             if 1 <= index <= len(chosen["enrolled"]):
                 member = chosen["enrolled"][index - 1]
             else:
                 raise IndexError
         except (ValueError, IndexError):
-            print("شمارۀ وارد شده نامعتبر است")
+            print("Invalid number.")
             return
 
         self.edit_workout(class_id, member)
@@ -121,16 +121,16 @@ class CoachPanel:
         current = self.workouts.get_exercises(class_id, member, self.coach)
 
         if current:
-            print("\nبرنامۀ فعلی:")
+            print("\nCurrent workout plan:")
             for exercise in current:
                 print("  -", exercise)
         else:
-            print("\nهنوز برنامه ای ثبت نشده است")
+            print("\nNo workout plan has been recorded yet.")
 
         while True:
-            print("\n1. افزودن حرکت   2. جایگزینی کامل   3. بازگشت")
+            print("\n1. Add exercise   2. Replace entire plan   3. Back")
 
-            choice = input("گزینۀ موردنظر: ").strip()
+            choice = input("Choose an option: ").strip()
 
             if choice == "1":
                 self.add_one_exercise(class_id, member)
@@ -139,46 +139,46 @@ class CoachPanel:
             elif choice == "3":
                 return
             else:
-                print("این گزینه نامعتبر است")
+                print("Invalid option.")
 
     def add_one_exercise(self, class_id, member):
         try:
-            exercise_name = input("نام حرکت: ").strip()
-            number_of_sets = int(input("تعداد ست های موردنظر: "))
-            number_of_repeats = int(input("تعداد تکرارهای موردنظر: "))
-            rest_time = int(input("مدت زمان استراحت موردنظر (برحسب ثانیه): "))
-            exercise_description = input("توضیحات مربوطه (اختیاری): ").strip()
+            exercise_name = input("Exercise name: ").strip()
+            number_of_sets = int(input("Number of sets: "))
+            number_of_repeats = int(input("Number of repetitions: "))
+            rest_time = int(input("Rest time (seconds): "))
+            exercise_description = input("Description (optional): ").strip()
 
             if exercise_description == "":
                 exercise_description = "---"
 
             exercise = Exercise(exercise_name, number_of_sets, number_of_repeats, rest_time, exercise_description)
             self.workouts.add_exercise(class_id, member, self.coach, exercise)
-            print("حرکت اضافه شد")
+            print("Exercise added successfully.")
         except ValueError as exception:
-            print(f"ورودی نامعتبر: {exception}")
+            print(f"Invalid input: {exception}")
 
     def replace_all(self, class_id, member):
-        print("نام هر حرکت را وارد کرده و سپس برای پایان عملیات، نام حرکت را خالی بگذارید")
+        print("Enter each exercise name; leave it blank to finish.")
 
         exercises = []
         while True:
             try:
-                exercise_name = input("نام حرکت: ").strip()
+                exercise_name = input("Exercise name: ").strip()
                 if exercise_name == "":
                     break
 
-                number_of_sets = int(input("تعداد ست های موردنظر: "))
-                number_of_repeats = int(input("تعداد تکرارهای موردنظر: "))
-                rest_time = int(input("مدت زمان استراحت موردنظر (برحسب ثانیه): "))
-                exercise_description = input("توضیحات مربوطه (اختیاری): ").strip()
+                number_of_sets = int(input("Number of sets: "))
+                number_of_repeats = int(input("Number of repetitions: "))
+                rest_time = int(input("Rest time (seconds): "))
+                exercise_description = input("Description (optional): ").strip()
 
                 if exercise_description == "":
                     exercise_description = "---"
 
                 exercises.append(Exercise(exercise_name, number_of_sets, number_of_repeats, rest_time, exercise_description))
             except ValueError as exception:
-                print(f"ورودی نامعتبر: {exception}")
+                print(f"Invalid input: {exception}")
 
         self.workouts.save_exercises(class_id, member, self.coach, exercises)
-        print("برنامه ذخیره شد")
+        print("Workout plan saved successfully.")
