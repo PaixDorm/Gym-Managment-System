@@ -27,7 +27,7 @@ def get_all_classes():
         information = information.split(" | ")
 
         if len(information) != 9:
-            raise ValueError("فرمت اطلاعات این کلاس نامعتبر است")
+            raise ValueError("Invalid class data format.")
 
         cls = {
             "id": information[0],
@@ -60,15 +60,15 @@ class MemberPanel:
 
     def runner(self):
         while True:
-            print("\n===== پنل عضو =====")
-            print("1. پروفایل و وضعیت اشتراک من")
-            print("2. کیف پول من")
-            print("3. کلاس های قابل ثبت نام")
-            print("4. کلاس های من")
-            print("5. برنامۀ تمرینی من")
-            print("6. خروج")
+            print("\n===== Member Panel =====")
+            print("1. My profile and subscription status")
+            print("2. My wallet")
+            print("3. Available classes")
+            print("4. My classes")
+            print("5. My workout plan")
+            print("6. Exit")
 
-            choice = input("گزینۀ موردنظر: ").strip()
+            choice = input("Choose an option: ").strip()
 
             if choice == "1":
                 self.my_profile_and_subscription_status()
@@ -83,7 +83,7 @@ class MemberPanel:
             elif choice == "6":
                 return
             else:
-                print("این گزینه نامعتبر است")
+                print("Invalid option.")
 
     def my_profile_and_subscription_status(self):
         user = find_username(self.username)
@@ -91,34 +91,34 @@ class MemberPanel:
         user_subscription = get_current_subscription(self.username)
 
         if user is None:
-            print("چنین کاربری بافت نشد")
+            print("User not found.")
             return
 
-        print(f"نام: {user.name}")
-        print(f"نام کاربری: {user.username}")
-        print(f"ایمیل: {user.email}")
-        print(f"وضعیت حساب کاربر: {user.is_active}")
+        print(f"Name: {user.name}")
+        print(f"Username: {user.username}")
+        print(f"Email: {user.email}")
+        print(f"Account active: {user.is_active}")
         if user_subscription_state == "none" or user_subscription is None:
-            print("بدون اشتراک")
+            print("No subscription")
         else:
-            print(f"نوع اشتراک کاربر: {user_subscription.months} ماهه")
-            print(f"تاریخ شروع اشتراک کاربر: {user_subscription.start_date}")
-            print(f"تاریخ پایان اشتراک کاربر: {user_subscription.end_date}")
+            print(f"Subscription duration: {user_subscription.months} months")
+            print(f"Subscription start date: {user_subscription.start_date}")
+            print(f"Subscription end date: {user_subscription.end_date}")
             if user_subscription_state == "active":
-                print(f"روزهای باقی‌مانده: {get_days_left(self.username)}")
-            print(f"وضعیت اشتراک کاربر: {user_subscription_state}")
+                print(f"Days remaining: {get_days_left(self.username)}")
+            print(f"Subscription status: {user_subscription_state}")
 
     def see_my_wallet(self):
         wallet = get_wallet(self.username)
-        print(f"موجودی: {wallet.balance}")
+        print(f"Balance: {wallet.balance}")
 
     def charge_my_wallet(self):
-        my_card = input("شمارۀ کارت موردنظر خود را وارد کنید (16 رقمی): ").strip()
-        my_card_month = input("ماه انقضای کارت موردنظر خود را وارد کنید (از 1 تا 12): ").strip()
-        my_card_year = input("سال انقضای کارت موردنظر خود را وارد کنید (4 رقمی): ").strip()
-        my_card_password = input("رمز دوم کارت موردنظر خود را وارد کنید (6 رقمی): ").strip()
-        my_card_cvv2 = input("cvv2 کارت موردنظر خود را وارد کنید (3 رقمی): ").strip()
-        my_amount = input("مبلغ موردنظر خود را وارد کنید (مقداری طبیعی، به تومان): ").strip()
+        my_card = input("Card number (16 digits): ").strip()
+        my_card_month = input("Card expiration month (1-12): ").strip()
+        my_card_year = input("Card expiration year (4 digits): ").strip()
+        my_card_password = input("Card payment password (6 digits): ").strip()
+        my_card_cvv2 = input("Card CVV2 (3 digits): ").strip()
+        my_amount = input("Amount to add (positive integer, Toman): ").strip()
 
         charge_wallet(self.username, my_card, my_card_month, my_card_year, my_card_password, my_card_cvv2, my_amount)
 
@@ -126,7 +126,7 @@ class MemberPanel:
         transactions = get_transactions(self.username)
 
         if not transactions:
-            print("تراکنشی وجود ندارد")
+            print("No transactions found.")
             return
 
         for transaction in transactions:
@@ -134,23 +134,23 @@ class MemberPanel:
 
     def buy_or_renewal_my_subscription(self):
         for months, plan in get_plans().items():
-            print(f"{months} ماهه - {plan.price:,} تومان")
+            print(f"{months} months - {plan.price:,} Toman")
 
-        choice = input("گزینۀ موردنظر (از میان اعداد 1، 3، 6): ").strip()
+        choice = input("Subscription duration (1, 3, or 6 months): ").strip()
         if choice not in ("1", "3", "6"):
-            print("این گزینه نامعتبر است")
+            print("Invalid option.")
             return
         buy_subscription(self.username, int(choice))
 
     def my_wallet(self):
         while True:
-            print("\n===== کیف پول من =====")
-            print("1. مشاهده موجودی")
-            print("2. شارژ کیف پول")
-            print("3. مشاهده تراکنش‌ها")
-            print("4. خرید یا تمدید اشتراک")
-            print("5. بازگشت")
-            choice = input("انتخاب: ").strip()
+            print("\n===== My Wallet =====")
+            print("1. View balance")
+            print("2. Add funds to wallet")
+            print("3. View transactions")
+            print("4. Purchase or renew subscription")
+            print("5. Back")
+            choice = input("Choose an option: ").strip()
             try:
                 if choice == "1":
                     self.see_my_wallet()
@@ -168,14 +168,14 @@ class MemberPanel:
                     return
 
                 else:
-                    print("گزینه نامعتبر است")
+                    print("Invalid option.")
             except (
                 ValueError,
                 InsufficientBalanceError,
                 StorageError,
                 OSError
             ) as error:
-                print("عملیات مالی انجام نشد:", error)
+                print("Financial operation failed:", error)
     def view_available_classes(self):
         classes = get_all_classes()
 
@@ -187,44 +187,44 @@ class MemberPanel:
                 available_classes.append(cls)
 
         if not available_classes:
-            print("هیچ کلاس فعالی وجود ندارد")
+            print("No active classes are available.")
             return
 
         for cls in available_classes:
             remaining_capacity = cls["capacity"] - len(cls["enrolled"])
 
             print(f"\n[{cls['id']}] {cls['title']} ({cls['sport']})")
-            print(f"   مربی: {cls['coach']}")
-            print(f"   سالن: {cls['hall']}")
-            print(f"   روز و ساعت: {cls['day']} {cls['time']}")
-            print(f"   ظرفیت باقی مانده: {remaining_capacity} از {cls['capacity']}")
+            print(f"   Coach: {cls['coach']}")
+            print(f"   Hall: {cls['hall']}")
+            print(f"   Day and time: {cls['day']} {cls['time']}")
+            print(f"   Places remaining: {remaining_capacity} of {cls['capacity']}")
 
 
-        class_id = input("\nشناسۀ کلاس برای ثبت نام (یا back برای بازگشت): ").strip()
+        class_id = input("\nClass ID to enroll (or 'back' to return): ").strip()
         if class_id == "back":
             return
 
         cls = get_class_by_id(class_id)
         if cls is None:
-            print("چنین کلاسی پیدا نشد")
+            print("Class not found.")
             return
 
         if self.username in cls["enrolled"]:
-            print("شما قبلاً در این کلاس ثبت نام کرده اید؛ برای مشاهدۀ آن، به بخش *کلاس های من* مراجعه کنید")
+            print("You are already enrolled in this class. See 'My classes'.")
             return
 
         try:
             is_subscription_active = has_active_subscription(self.username)
             enrollment = self.enrollments.enroll(self.username, class_id, cls, is_subscription_active)
-            print("ثبت نام شما با موفقیت انجام شد. شماره پیگیری:", enrollment.tracking_number)
+            print("Enrollment successful. Tracking number:", enrollment.tracking_number)
         except PermissionError as error:
-            print("شما نمی توانید ثبت نام کنید:", error)
+            print("Cannot enroll:", error)
 
     def my_classes(self):
         member_classes = self.enrollments.get_member_enrollments(self.username)
 
         if not member_classes:
-            print("شما هیچ ثبت نام فعالی ندارید")
+            print("You have no active enrollments.")
             return
 
         for index, member_class in enumerate(member_classes, start = 1):
@@ -232,10 +232,10 @@ class MemberPanel:
 
             if cls:
                 print(f"{index}. [{cls['id']}] {cls['title']} ({cls['sport']})")
-                print(f"   شمارۀ پیگیری شما: {member_class.tracking_number})")
+                print(f"   Your tracking number: {member_class.tracking_number})")
 
         try:
-            index = int(input("می خواهید کدام ثبت نام خود را لغو کنید؟ (برای بازگشت عدد 0 را وارد کنید): "))
+            index = int(input("Which enrollment would you like to cancel? (0 to return): "))
             if index == 0:
                 return
             elif 1 <= index <= len(member_classes):
@@ -243,31 +243,31 @@ class MemberPanel:
             else:
                 raise IndexError
         except (ValueError, IndexError):
-            print("شمارۀ وارد شده نامعتبر است")
+            print("Invalid number.")
             return
 
         if self.enrollments.cancel(self.username, wanted_class.class_id):
-            print("عملیات لغو ثبت نام با موفقیت انجام شد")
+            print("Enrollment cancelled successfully.")
         else:
-            print("عملیات لغو ثبت نام انجام نشد")
+            print("Could not cancel enrollment.")
 
     def my_workout(self):
         member_classes = self.enrollments.get_member_enrollments(self.username)
 
         if not member_classes:
-            print("شما در هیچ کلاسی ثبت نام نکرده اید")
+            print("You are not enrolled in any classes.")
             return
 
         for member_class in member_classes:
             exercises = self.workouts.get_exercises(member_class.class_id, self.username)
-            print(f"\n===== برنامۀ کلاس {member_class.class_id} =====")
+            print(f"\n===== Workout plan for class {member_class.class_id} =====")
 
             if not exercises:
-                print("شما هنوز برنامۀ تمرینی ای ندارید")
+                print("You do not have a workout plan yet.")
                 continue
 
             for exercise in exercises:
                 print(" -", exercise)
 
                 if exercise.exercise_description:
-                    print(f"   توضیحات مربوطه: {exercise.exercise_description}")
+                    print(f"   Description: {exercise.exercise_description}")

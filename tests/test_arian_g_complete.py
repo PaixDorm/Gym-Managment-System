@@ -215,7 +215,7 @@ def test_profile_without_subscription(monkeypatch, capsys):
     monkeypatch.setattr(mod, "get_subscription_state", lambda _: "none")
     monkeypatch.setattr(mod, "get_current_subscription", lambda _: None)
     mod.MemberPanel("sara").my_profile_and_subscription_status()
-    assert "بدون اشتراک" in capsys.readouterr().out
+    assert "No subscription" in capsys.readouterr().out
 
 
 def test_profile_handles_inactive_state_without_subscription(monkeypatch, capsys):
@@ -227,7 +227,7 @@ def test_profile_handles_inactive_state_without_subscription(monkeypatch, capsys
     monkeypatch.setattr(mod, "get_subscription_state", lambda _: "inactive")
     monkeypatch.setattr(mod, "get_current_subscription", lambda _: None)
     mod.MemberPanel("sara").my_profile_and_subscription_status()
-    assert "بدون اشتراک" in capsys.readouterr().out
+    assert "No subscription" in capsys.readouterr().out
 
 def test_profile_with_active_subscription(monkeypatch, capsys):
     mod = member_module(monkeypatch)

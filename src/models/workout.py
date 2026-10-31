@@ -1,13 +1,13 @@
 class Exercise:
     def __init__(self, exercise_name, number_of_sets, number_of_repeats, rest_time, exercise_description = "---"):
         if exercise_name.strip() == "":
-            raise ValueError("نام حرکت نمی تواند خالی باشد")
+            raise ValueError("Exercise name cannot be empty.")
         if not number_of_sets > 0:
-            raise ValueError("تعداد ست های تمرین باید بزرگتر از صفر باشد")
+            raise ValueError("Number of sets must be greater than zero.")
         if not number_of_repeats > 0:
-            raise ValueError("تعداد تکرارهای تمرین باید بزرگتر از صفر باشد")
+            raise ValueError("Number of repetitions must be greater than zero.")
         if not rest_time > 0:
-            raise ValueError("زمان استراحت تمرین باید بزرگتر از صفر باشد")
+            raise ValueError("Rest time must be greater than zero.")
 
         self.exercise_name = exercise_name
         self.number_of_sets = number_of_sets

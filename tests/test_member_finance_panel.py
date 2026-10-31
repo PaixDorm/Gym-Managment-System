@@ -23,7 +23,7 @@ class TestMemberFinancePanel(unittest.TestCase):
             patch("builtins.print") as mock_print,
         ):
             self.panel.my_profile_and_subscription_status()
-            mock_print.assert_any_call("بدون اشتراک")
+            mock_print.assert_any_call("No subscription")
 
     def test_view_wallet_balance(self):
         with (
@@ -32,7 +32,7 @@ class TestMemberFinancePanel(unittest.TestCase):
         ):
             self.panel.see_my_wallet()
             mock_wallet.assert_called_once_with("member_test")
-            mock_print.assert_any_call("موجودی: 150000")
+            mock_print.assert_any_call("Balance: 150000")
 
     def test_view_no_transactions(self):
         with (
@@ -41,7 +41,7 @@ class TestMemberFinancePanel(unittest.TestCase):
         ):
             self.panel.see_my_transactions()
             mock_transactions.assert_called_once_with("member_test")
-            mock_print.assert_any_call("تراکنشی وجود ندارد")
+            mock_print.assert_any_call("No transactions found.")
 
     def test_buy_subscription_calls_financial_module(self):
         with (
