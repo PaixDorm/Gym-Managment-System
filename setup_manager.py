@@ -7,6 +7,7 @@ from src.validation.validators import (
     validate_email,
     validate_name
 )
+from src.auth.password_security import hash_password
 try:
     users = load_user()
 except (OSError, ValueError, UnicodeError) as error:
@@ -50,7 +51,7 @@ else:
         new_manager = User(
             name=manager_name,
             username=manager_username,
-            password=manager_password,
+            password=hash_password(manager_password),
             email=manager_email,
             role="manager",
             is_active=True

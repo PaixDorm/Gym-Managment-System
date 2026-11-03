@@ -1,10 +1,12 @@
 from src.logging.activity_logger import log_action
 from src.admin.user_manager import load_user
+from src.auth.password_security import verify_password
+from getpass import getpass
 @log_action
 def authenticate_user(username, password, role, users):
     for user in users :
         if username == user["username"]:
-            if password == user["password"]:
+            if verify_password(password, user["password"]):
                 if role == user["role"]:
                     if user["is_active"]:
                         return {"success": True,"username": user["username"],"role": user["role"]}
@@ -18,7 +20,7 @@ def authenticate_user(username, password, role, users):
 def login(role, users):
     while True:
         username = input("Enter your username: ")
-        password = input("Enter your password: ")
+        password = getpass("Enter your password: ")
         result = authenticate_user(username, password, role, users)
         if result["success"]:
             print("Login Successful")

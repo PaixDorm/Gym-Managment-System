@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 from src.auth.authentication import authenticate_user
-
+from src.auth.password_security import hash_password
 
 class AuthenticationTests(unittest.TestCase):
 
@@ -9,7 +9,7 @@ class AuthenticationTests(unittest.TestCase):
         self.users = [
             {
                 "username": "amir",
-                "password": "Test@123",
+                "password": hash_password("Test@123"),
                 "role": "coach",
                 "is_active": True
             },

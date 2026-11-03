@@ -1,6 +1,7 @@
 import os
 from src.models.user import User
 from src.validation.validators import (validate_name,validate_username,validate_password,validate_email)
+from src.auth.password_security import hash_password
 USERS_FILE = "data/users.txt"
 def load_user():
     if not os.path.exists(USERS_FILE):
@@ -66,7 +67,14 @@ def add_user(name,username,password,email,role,is_active=True):
         if user.username == username:
             print("Duplicate username.")
             return False
-    new_user = User(name=name,username=username,password=password,email=email,role=role,is_active=is_active)
+    new_user = User(
+        name=name,
+        username=username,
+        password=hash_password(password),
+        email=email,
+        role=role,
+        is_active=is_active
+    )
     users.append(new_user)
     try:
         save_user(users)
@@ -98,7 +106,7 @@ def edit_user(username,new_name=None,new_password=None,new_email=None,new_is_act
         if not validate_password(new_password):
             print("Invalid new password.")
             return False
-        target.password = new_password
+        target.password = hash_password(new_password)
     if new_email is not None:
         if not validate_email(new_email):
             print("Invalid new email address.")
