@@ -112,15 +112,57 @@ class MemberPanel:
         wallet = get_wallet(self.username)
         print(f"Balance: {wallet.balance}")
 
-    def charge_my_wallet(self):
-        my_card = input("Card number (16 digits): ").strip()
-        my_card_month = input("Card expiration month (1-12): ").strip()
-        my_card_year = input("Card expiration year (4 digits): ").strip()
-        my_card_password = input("Card payment password (6 digits): ").strip()
-        my_card_cvv2 = input("Card CVV2 (3 digits): ").strip()
-        my_amount = input("Amount to add (positive integer, Toman): ").strip()
+    
+def charge_my_wallet(self):
+    """Top up the wallet using a simulated payment."""
 
-        charge_wallet(self.username, my_card, my_card_month, my_card_year, my_card_password, my_card_cvv2, my_amount)
+    from src.member.wallet_manager import StorageError
+
+    print("\n=== Demo Wallet Top-Up ===")
+    print("This is a simulated payment.")
+    print("No real money will be transferred.")
+    print("Do not enter any real banking information.")
+
+    amount = input("Amount to add (Toman): ").strip()
+
+    if not amount.isascii() or not amount.isdecimal():
+        print("Invalid amount. Enter a positive integer.")
+        return
+
+    try:
+        if int(amount) <= 0:
+            print("Amount must be greater than zero.")
+            return
+    except ValueError:
+        print("Invalid amount.")
+        return
+
+    # Fixed fictional credentials for the local payment simulator.
+    demo_card = "0000000000000000"
+    demo_month = "12"
+    demo_year = "1407"
+    demo_password = "000000"
+    demo_cvv2 = "000"
+
+    try:
+        transaction = charge_wallet(
+            self.username,
+            demo_card,
+            demo_month,
+            demo_year,
+            demo_password,
+            demo_cvv2,
+            amount
+        )
+
+    except (ValueError, StorageError) as error:
+        print(f"Wallet top-up failed: {error}")
+        return
+
+    print("\nWallet topped up successfully!")
+    print(f"Amount: {int(amount):,} Toman")
+    print(f"Tracking code: {transaction.tracking_code}")
+    print("Payment type: Simulation")
 
     def see_my_transactions(self):
         transactions = get_transactions(self.username)
