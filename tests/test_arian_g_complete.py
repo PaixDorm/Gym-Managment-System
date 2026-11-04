@@ -252,15 +252,29 @@ def test_wallet_shows_balance_and_transactions(monkeypatch, capsys):
     panel.see_my_transactions()
     text = capsys.readouterr().out
     assert "150000" in text and "TX1" in text
+
+
 def test_wallet_charge_forwards_user_inputs(monkeypatch):
     mod = member_module(monkeypatch)
+
     charge = Mock()
     monkeypatch.setattr(mod, "charge_wallet", charge)
-    inputs = iter(["1234567890123456", "12", "2027", "123456", "123", "50000"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+
+    fake_input = Mock(return_value="50000")
+    monkeypatch.setattr("builtins.input", fake_input)
+
     mod.MemberPanel("sara").charge_my_wallet()
+
+    fake_input.assert_called_once()
+
     charge.assert_called_once_with(
-        "sara", "1234567890123456", "12", "2027", "123456", "123", "50000"
+        "sara",
+        "0000000000000000",
+        "12",
+        "1407",
+        "000000",
+        "000",
+        "50000"
     )
 def test_subscription_purchase_calls_financial_module(monkeypatch):
     mod = member_module(monkeypatch)

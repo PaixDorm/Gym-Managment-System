@@ -53,14 +53,26 @@ class TestMemberFinancePanel(unittest.TestCase):
             self.panel.buy_or_renewal_my_subscription()
             mock_buy.assert_called_once_with("member_test", 3)
 
+    
     def test_charge_wallet_calls_financial_module(self):
-        inputs = ["1111222233334444", "09", "1405", "012345", "123", "50000"]
         with (
-            patch("builtins.input", side_effect=inputs),
+            patch("builtins.input", return_value="50000") as mock_input,
             patch("src.member.member_panel.charge_wallet") as mock_charge,
         ):
             self.panel.charge_my_wallet()
-            mock_charge.assert_called_once_with("member_test", *inputs)
+
+        mock_input.assert_called_once()
+
+        mock_charge.assert_called_once_with(
+            "member_test",
+            "0000000000000000",
+            "12",
+            "1407",
+            "000000",
+            "000",
+            "50000"
+        )
+
 
 
 if __name__ == "__main__":
