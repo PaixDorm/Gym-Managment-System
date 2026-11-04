@@ -167,12 +167,38 @@ def record_transaction(transaction):
         return
     _append_line(transaction.to_line())
 
-def _mask_receipt(card, payment_id):
-    """Mask receipt: first four digits, eight stars, last four, then payment suffix."""
-    if not (isinstance(card, str) and isinstance(payment_id, str)
-            and len(card) == 16 and payment_id.startswith(card) and len(payment_id) > 16):
-        raise ValueError("Bank receipt cannot be masked.")
-    return card[:4] + "*" * 8 + card[-4:] + payment_id[16:]
+
+def _mask_receipt(card, payment_id, amount=None):
+    """Create a masked receipt without exposing full card details."""
+
+    if not isinstance(card, str) or not card_regex.fullmatch(card):
+        raise ValueError("Invalid card number.")
+
+    if not isinstance(payment_id, str) or not payment_id:
+        raise ValueError("Invalid payment reference.")
+
+    masked_card = f"{card[:4]}********{card[-4:]}"
+
+    # Compatibility with legacy simulated payment references.
+    if payment_id.startswith(card):
+        suffix = payment_id[len(card):]
+
+        if not re.fullmatch(r"[0-9]{1,32}", suffix):
+            raise ValueError("Invalid legacy payment reference.")
+
+        return masked_card + suffix
+
+    # Never expose a full card number in the receipt.
+    if card in payment_id:
+        raise ValueError("Unsafe payment reference.")
+
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", payment_id):
+        raise ValueError("Invalid simulated payment reference.")
+
+    if type(amount) is not int or amount <= 0:
+        raise ValueError("Invalid payment amount.")
+
+    return f"{masked_card}{amount}:{payment_id}"
 
 def new_transaction(username, transaction_type, amount, description, when=None):
     """Create a transaction with a unique tracking code."""
@@ -194,10 +220,10 @@ def charge_wallet(username, card, month, year, password, cvv2, amount):
         raise ValueError("Bank rejected the card details.") from None
     if not payment_result:
         raise ValueError("Bank transaction failed.")
-    try:
-        transaction.attach_receipt(_mask_receipt(valid_card, payment_result))
-    except ValueError:
-        pass
+    transaction.attach_receipt(
+        _mask_receipt(valid_card, payment_result, valid_amount)
+    )
+
     for attempt in range(2):
         try:
             record_transaction(transaction)

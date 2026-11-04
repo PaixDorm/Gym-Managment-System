@@ -1,28 +1,43 @@
-class API:
 
-    def __init__(self):
-        pass
+import re
+from uuid import uuid4
+
+
+class API:
+    """Simulated payment provider. No real payments are processed."""
 
     def validate(self, card, exp_month, exp_year, password, cvv2):
-        if len(str(card)) != 16 or not str(card).isnumeric():
+        if not re.fullmatch(r"[0-9]{16}", str(card)):
             return False
-        if not (1 <= exp_month <= 12):
+
+        try:
+            month = int(exp_month)
+            year = int(exp_year)
+        except (TypeError, ValueError):
             return False
-        if exp_year < 1403 or exp_year > 1408:
+
+        if not 1 <= month <= 12:
             return False
-        if len(str(password)) != 6:
+
+        if not 1403 <= year <= 1408:
             return False
-        if len(str(cvv2)) != 3:
+
+        if not re.fullmatch(r"[0-9]{6}", str(password)):
             return False
+
+        if not re.fullmatch(r"[0-9]{3}", str(cvv2)):
+            return False
+
         return True
 
     def generate_payment_id(self, amount, card):
-        import random
-        return f'{card}{amount}{random.randint(100000, 999999)}'
+        """Generate a unique reference without exposing card details."""
+        return f"SIM-{uuid4().hex}"
 
     def pay(self, card, exp_month, exp_year, password, cvv2, amount):
-        if self.validate(card, exp_month, exp_year, password, cvv2):
-            return self.generate_payment_id(amount, card)
-        else:
-            raise ValueError('Invalid payment details.')
+        if not self.validate(
+            card, exp_month, exp_year, password, cvv2
+        ):
+            raise ValueError("Invalid simulated payment details.")
 
+        return self.generate_payment_id(amount, card)

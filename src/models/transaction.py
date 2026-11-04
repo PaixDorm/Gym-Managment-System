@@ -16,10 +16,32 @@ def generate_tracking_code():
     random_number = f"{secrets.randbelow(10**8):08d}"
     return f"TRX-{strtime}-{random_number}"
 
+
 def _validate_receipt(receipt):
-    """Require a masked receipt or None; never store a full card number."""
-    if receipt is not None and (not isinstance(receipt, str) or not receipt_regex.fullmatch(receipt)):
-        raise ValueError("Invalid bank receipt format; only masked receipts are accepted.")
+    """Validate masked receipts without exposing card numbers."""
+
+    if receipt is None:
+        return
+
+    if not isinstance(receipt, str):
+        raise ValueError("Invalid bank receipt format.")
+
+    # Accept existing legacy masked receipts.
+    legacy_valid = bool(receipt_regex.fullmatch(receipt))
+
+    # Accept new UUID-based simulated payment receipts.
+    simulated_valid = bool(
+        re.fullmatch(
+            r"[0-9]{4}\*{8}[0-9]{4}[1-9][0-9]*:SIM-[0-9a-f]{32}",
+            receipt
+        )
+    )
+
+    if not (legacy_valid or simulated_valid):
+        raise ValueError(
+            "Invalid bank receipt format; "
+            "only masked receipts are accepted."
+        )
 
 class Transaction:
     def __init__(self, username, transaction_type, amount, description, date=None, tracking_code=None, receipt=None):
